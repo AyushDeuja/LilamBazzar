@@ -54,7 +54,36 @@ model Orgainzation {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user User @relation(fields: [user_id], references: [id])
+  user     User      @relation(fields: [user_id], references: [id])
+  products Product[]
 
   @@map("organizations")
+}
+
+model Category {
+  id            Int      @id @default(autoincrement())
+  category_name String   @db.VarChar(191)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  product_name    String   @db.VarChar(191)
+  price           Decimal  @db.Decimal(10, 2)
+  stock           Int      @default(0)
+  description     String?  @db.VarChar(191)
+  category_id     Int
+  organization_id Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Orgainzation @relation(fields: [organization_id], references: [id])
+  category     Category     @relation(fields: [category_id], references: [id])
+
+  @@map("products")
 }
