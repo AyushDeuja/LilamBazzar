@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaClient } from 'generated/prisma';
+import { PrismaClient, User } from 'generated/prisma';
 import { hash } from 'bcrypt';
 
 @Injectable()
@@ -44,8 +44,37 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    let user: User | null;
+    await this.findOne(id); // Check if user exists
+
+    if (updateUserDto.email) {
+      user = await this.prisma.user.findUnique({
+        where: { email: updateUserDto.email },
+      });
+      if (user && user.id !== id) {
+        throw new BadRequestException('This email is already taken');
+      }
+    }
+
+    if (updateUserDto.mobile) {
+      user = await this.prisma.user.findUnique({
+        where: { mobile: updateUserDto.mobile },
+      });
+      if (user && user.id !== id) {
+        throw new BadRequestException('This mobile number is already taken');
+      }
+    }
+
+    // Hash password here using bcrypt
+    if (updateUserDto.password) {
+      updateUserDto.password = await hash(updateUserDto.password, 10);
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   remove(id: number) {
