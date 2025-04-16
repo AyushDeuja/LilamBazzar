@@ -30,14 +30,18 @@ export class UsersService {
     });
   }
 
-  async findAll(role_id: number) {
-    return this.prisma.user.findMany({
-      where: { role_id }, // Filter by role_id
-    });
+  async findAll() {
+    return this.prisma.user.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
