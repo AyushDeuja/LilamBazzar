@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaClient } from 'generated/prisma';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,13 @@ export class UsersService {
     if (user) {
       throw new BadRequestException('This mobile number is already in use');
     }
+
+    // Hash password here using bcrypt
+    createUserDto.password = await hash(createUserDto.password, 10);
+
+    return this.prisma.user.create({
+      data: createUserDto,
+    });
   }
 
   findAll() {
