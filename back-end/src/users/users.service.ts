@@ -30,8 +30,10 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(role_id: number) {
+    return this.prisma.user.findMany({
+      where: { role_id }, // Filter by role_id
+    });
   }
 
   findOne(id: number) {
