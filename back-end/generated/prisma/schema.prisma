@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum roleType {
+  admin
+  vendor
+  customer
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(191)
+  email     String   @unique @db.VarChar(191)
+  mobile    String   @unique @db.VarChar(15)
+  password  String   @db.VarChar(191)
+  role_id   Int      @unique // One-to-One: must be unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role Role @relation(fields: [role_id], references: [id])
+
+  organization Orgainzation? // optional if user is only a customer and admin
+  Sale         Sale[]
+  Purchase     Purchase[]
+  Cart         Cart[]
+
+  @@map("users")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  role_name roleType @default(customer)
+
+  user User? // optional if role is not yet assigned
+
+  @@map("roles")
+}
+
+model Orgainzation {
+  id                Int      @id @default(autoincrement())
+  organization_name String   @db.VarChar(191)
+  pan_no            String   @unique @db.VarChar(191)
+  user_id           Int      @unique // One-to-One: must be unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user     User       @relation(fields: [user_id], references: [id])
+  products Product[]
+  Sale     Sale[]
+  Purchase Purchase[]
+
+  @@map("organizations")
+}
+
+model Category {
+  id            Int      @id @default(autoincrement())
+  category_name String   @db.VarChar(191)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  product_name    String   @db.VarChar(191)
+  price           Decimal  @db.Decimal(10, 2)
+  stock           Int      @default(0)
+  description     String?  @db.VarChar(191)
+  category_id     Int
+  organization_id Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sales Sale[]
+
+  organization Orgainzation @relation(fields: [organization_id], references: [id])
+  category     Category     @relation(fields: [category_id], references: [id])
+  Purchase     Purchase[]
+  Cart         Cart[]
+
+  @@map("products")
+}
+
+model Sale {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  product_id      Int
+  organization_id Int
+  quantity        Int
+  total           Decimal  @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User         @relation(fields: [user_id], references: [id])
+  organization Orgainzation @relation(fields: [organization_id], references: [id])
+  product      Product      @relation(fields: [product_id], references: [id])
+
+  @@map("sales")
+}
+
+model Purchase {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  product_id      Int
+  organization_id Int
+  quantity        Int
+  const_price     Decimal  @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User         @relation(fields: [user_id], references: [id])
+  organization Orgainzation @relation(fields: [organization_id], references: [id])
+  product      Product      @relation(fields: [product_id], references: [id])
+
+  @@map("purchases")
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User    @relation(fields: [user_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("carts")
+}
