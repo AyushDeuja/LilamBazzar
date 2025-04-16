@@ -77,7 +77,10 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    await this.findOne(id); // Check if user exists
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
