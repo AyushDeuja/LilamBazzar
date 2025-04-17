@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { roleType } from 'generated/prisma';
 
 export class CreateUserDto {
   @IsString()
@@ -17,7 +18,16 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
+  @IsEnum(roleType)
+  @IsOptional()
+  user_role: string;
+
+  //these are only for vendors
   @IsString()
   @IsOptional()
-  role_id: number;
+  organization_name: string;
+
+  @IsString()
+  @IsOptional()
+  pan_no: string;
 }
