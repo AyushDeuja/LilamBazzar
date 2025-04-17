@@ -123,21 +123,9 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   mobile: 'mobile',
   password: 'password',
-  role_id: 'role_id',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.RoleScalarFieldEnum = {
-  id: 'id',
-  role_name: 'role_name'
-};
-
-exports.Prisma.OrgainzationScalarFieldEnum = {
-  id: 'id',
+  user_role: 'user_role',
   organization_name: 'organization_name',
   pan_no: 'pan_no',
-  user_id: 'user_id',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -152,11 +140,21 @@ exports.Prisma.CategoryScalarFieldEnum = {
 exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   product_name: 'product_name',
-  price: 'price',
-  stock: 'stock',
+  base_price: 'base_price',
   description: 'description',
+  stock: 'stock',
   category_id: 'category_id',
   organization_id: 'organization_id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BidScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  bidder_id: 'bidder_id',
+  bid_price: 'bid_price',
+  is_winner: 'is_winner',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -165,7 +163,6 @@ exports.Prisma.SaleScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
   product_id: 'product_id',
-  organization_id: 'organization_id',
   quantity: 'quantity',
   total: 'total',
   createdAt: 'createdAt',
@@ -176,7 +173,6 @@ exports.Prisma.PurchaseScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
   product_id: 'product_id',
-  organization_id: 'organization_id',
   quantity: 'quantity',
   const_price: 'const_price',
   createdAt: 'createdAt',
@@ -188,6 +184,28 @@ exports.Prisma.CartScalarFieldEnum = {
   user_id: 'user_id',
   product_id: 'product_id',
   quantity: 'quantity',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  id: 'id',
+  order_no: 'order_no',
+  total_amount: 'total_amount',
+  is_delivered: 'is_delivered',
+  has_confirmed: 'has_confirmed',
+  is_paid: 'is_paid',
+  order_by: 'order_by',
+  bid_id: 'bid_id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrderHasItemScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  order_id: 'order_id',
+  product_price: 'product_price',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -214,13 +232,14 @@ exports.roleType = exports.$Enums.roleType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Role: 'Role',
-  Orgainzation: 'Orgainzation',
   Category: 'Category',
   Product: 'Product',
+  Bid: 'Bid',
   Sale: 'Sale',
   Purchase: 'Purchase',
-  Cart: 'Cart'
+  Cart: 'Cart',
+  Order: 'Order',
+  OrderHasItem: 'OrderHasItem'
 };
 
 /**
