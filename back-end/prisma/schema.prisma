@@ -155,3 +155,17 @@ model Order {
 
   @@map("orders")
 }
+
+model OrderHasItem {
+  id            Int      @id @default(autoincrement())
+  product_id    Int
+  order_id      Int
+  product_price Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  order   Order   @relation(fields: [order_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_has_items")
+}
