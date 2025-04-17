@@ -136,3 +136,22 @@ model Cart {
 
   @@map("carts")
 }
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  order_no      Int
+  total_amount  Int
+  is_delivered  Boolean  @default(false)
+  has_confirmed Boolean  @default(false)
+  is_paid       Boolean  @default(false)
+  order_by      Int
+  bid_id        Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user         User           @relation(fields: [order_by], references: [id])
+  bid          Bid            @relation(fields: [bid_id], references: [id])
+  OrderHasItem OrderHasItem[]
+
+  @@map("orders")
+}
