@@ -15,54 +15,32 @@ datasource db {
 }
 
 enum roleType {
-  admin
-  vendor
-  customer
+  admin    @map("0")
+  vendor   @map("1")
+  customer @map("2")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(191)
-  email     String   @unique @db.VarChar(191)
-  mobile    String   @unique @db.VarChar(15)
-  password  String   @db.VarChar(191)
-  role_id   Int      @unique // One-to-One: must be unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  role Role @relation(fields: [role_id], references: [id])
-
-  organization Orgainzation? // optional if user is only a customer and admin
-  Sale         Sale[]
-  Purchase     Purchase[]
-  Cart         Cart[]
-
-  @@map("users")
-}
-
-model Role {
-  id        Int      @id @default(autoincrement())
-  role_name roleType
-
-  user User? // optional if role is not yet assigned
-
-  @@map("roles")
-}
-
-model Orgainzation {
   id                Int      @id @default(autoincrement())
-  organization_name String   @db.VarChar(191)
-  pan_no            String   @unique @db.VarChar(191)
-  user_id           Int      @unique // One-to-One: must be unique
+  name              String   @db.VarChar(191)
+  email             String   @unique @db.VarChar(191)
+  mobile            String   @unique @db.VarChar(15)
+  password          String   @db.VarChar(191)
+  user_role         roleType @default(customer)
+  //If vendor then
+  organization_name String?  @db.VarChar(191)
+  pan_no            String?  @unique @db.VarChar(191)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user     User       @relation(fields: [user_id], references: [id])
-  products Product[]
   Sale     Sale[]
   Purchase Purchase[]
+  Cart     Cart[]
+  Product  Product[]
+  Bid      Bid[]
+  Order    Order[]
 
-  @@map("organizations")
+  @@map("users")
 }
 
 model Category {
@@ -79,68 +57,37 @@ model Category {
 model Product {
   id              Int      @id @default(autoincrement())
   product_name    String   @db.VarChar(191)
-  price           Decimal  @db.Decimal(10, 2)
-  stock           Int      @default(0)
+  base_price      Decimal  @db.Decimal(10, 2) //for bidding
   description     String?  @db.VarChar(191)
+  stock           Int      @default(0)
   category_id     Int
-  organization_id Int
+  organization_id Int // should be vendor
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  sales Sale[]
+  category Category @relation(fields: [category_id], references: [id])
+  user     User     @relation(fields: [organization_id], references: [id])
 
-  organization Orgainzation @relation(fields: [organization_id], references: [id])
-  category     Category     @relation(fields: [category_id], references: [id])
+  sales        Sale[]
   Purchase     Purchase[]
   Cart         Cart[]
+  Bid          Bid[]
+  OrderHasItem OrderHasItem[]
 
   @@map("products")
 }
 
 model Sale {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  product_id      Int
-  organization_id Int
-  quantity        Int
-  total           Decimal  @db.Decimal(10, 2)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user         User         @relation(fields: [user_id], references: [id])
-  organization Orgainzation @relation(fields: [organization_id], references: [id])
-  product      Product      @relation(fields: [product_id], references: [id])
-
-  @@map("sales")
-}
-
-model Purchase {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  product_id      Int
-  organization_id Int
-  quantity        Int
-  const_price     Decimal  @db.Decimal(10, 2)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user         User         @relation(fields: [user_id], references: [id])
-  organization Orgainzation @relation(fields: [organization_id], references: [id])
-  product      Product      @relation(fields: [product_id], references: [id])
-
-  @@map("purchases")
-}
-
-model Cart {
   id         Int      @id @default(autoincrement())
   user_id    Int
   product_id Int
   quantity   Int
+  total      Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   user    User    @relation(fields: [user_id], references: [id])
   product Product @relation(fields: [product_id], references: [id])
 
-  @@map("carts")
+  @@map("sales")
 }
