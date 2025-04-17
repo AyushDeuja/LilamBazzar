@@ -20,7 +20,7 @@ export class CreateUserDto {
 
   @IsEnum(roleType)
   @IsOptional()
-  user_role: string;
+  user_role: roleType;
 
   //these are only for vendors
   @IsString()
