@@ -3796,7 +3796,7 @@ export namespace Prisma {
     /**
      * The data needed to create a Role.
      */
-    data?: XOR<RoleCreateInput, RoleUncheckedCreateInput>
+    data: XOR<RoleCreateInput, RoleUncheckedCreateInput>
   }
 
   /**
@@ -11880,13 +11880,13 @@ export namespace Prisma {
   }
 
   export type RoleCreateInput = {
-    role_name?: $Enums.roleType
+    role_name: $Enums.roleType
     user?: UserCreateNestedOneWithoutRoleInput
   }
 
   export type RoleUncheckedCreateInput = {
     id?: number
-    role_name?: $Enums.roleType
+    role_name: $Enums.roleType
     user?: UserUncheckedCreateNestedOneWithoutRoleInput
   }
 
@@ -11903,7 +11903,7 @@ export namespace Prisma {
 
   export type RoleCreateManyInput = {
     id?: number
-    role_name?: $Enums.roleType
+    role_name: $Enums.roleType
   }
 
   export type RoleUpdateManyMutationInput = {
@@ -13761,12 +13761,12 @@ export namespace Prisma {
   }
 
   export type RoleCreateWithoutUserInput = {
-    role_name?: $Enums.roleType
+    role_name: $Enums.roleType
   }
 
   export type RoleUncheckedCreateWithoutUserInput = {
     id?: number
-    role_name?: $Enums.roleType
+    role_name: $Enums.roleType
   }
 
   export type RoleCreateOrConnectWithoutUserInput = {

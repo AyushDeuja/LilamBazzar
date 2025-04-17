@@ -42,7 +42,7 @@ model User {
 
 model Role {
   id        Int      @id @default(autoincrement())
-  role_name roleType @default(customer)
+  role_name roleType
 
   user User? // optional if role is not yet assigned
 
