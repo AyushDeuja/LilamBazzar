@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -35,7 +36,7 @@ export class UsersService {
   }
 
   async findOne(id: number) {
-    const user = this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
     });
     if (!user) {
