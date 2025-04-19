@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { roleType } from 'generated/prisma';
 
