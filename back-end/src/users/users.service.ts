@@ -25,6 +25,24 @@ export class UsersService {
       }
     }
 
+    // Check if the user role is valid
+    const role = createUserDto.user_role ?? 'customer'; // default role
+
+    if (role === 'vendor') {
+      if (!createUserDto.organization_name || !createUserDto.pan_no) {
+        throw new BadRequestException(
+          'Vendors must have organization name and PAN number',
+        );
+      }
+    } else {
+      // For customer or admin: pan_no and organization_name should not be provided
+      if (createUserDto.organization_name || createUserDto.pan_no) {
+        throw new BadRequestException(
+          `${role} cannot have organization name or PAN number`,
+        );
+      }
+    }
+
     // Hash password here using bcrypt
     createUserDto.password = await hash(createUserDto.password, 10);
 
