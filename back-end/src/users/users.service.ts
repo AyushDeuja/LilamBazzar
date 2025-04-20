@@ -51,15 +51,23 @@ export class UsersService {
     });
 
     // Exclude organization_name and pan_no from the response when the user is not a vendor
-
-    //to exclude password from the response
-    const { password, ...userWithoutPassword } = createdUser;
-    return userWithoutPassword;
+    if (role !== 'vendor') {
+      const { organization_name, pan_no, password, ...userWithoutVendorInfo } =
+        createdUser;
+      return userWithoutVendorInfo; // Return user data without vendor info
+    } else {
+      const { password, ...userWithoutPassword } = createdUser;
+      return userWithoutPassword;
+    }
   }
 
   async findAll() {
     // Fetch all users from the database excluding the password field
     const users = await this.prisma.user.findMany();
+    if (!users || users.length === 0) {
+      throw new BadRequestException('No users found');
+    }
+
     return users.map(({ password, ...rest }) => rest); //destructuring to exclude password
   }
 
