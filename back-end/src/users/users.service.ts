@@ -29,17 +29,17 @@ export class UsersService {
     const role = createUserDto.user_role ?? 'customer'; // default role
 
     if (role === 'vendor') {
-      if (!createUserDto.organization_name || !createUserDto.pan_no) {
-        throw new BadRequestException(
-          'Vendors must have organization name and PAN number',
-        );
+      if (!createUserDto.organization_name) {
+        throw new BadRequestException('Vendors must have organization name');
+      } else if (!createUserDto.pan_no) {
+        throw new BadRequestException('Vendors must have PAN number');
       }
     } else {
       // For customer or admin: pan_no and organization_name should not be provided
-      if (createUserDto.organization_name || createUserDto.pan_no) {
-        throw new BadRequestException(
-          `${role} cannot have organization name or PAN number`,
-        );
+      if (createUserDto.organization_name) {
+        throw new BadRequestException(`${role} cannot have organization name`);
+      } else if (createUserDto.pan_no) {
+        throw new BadRequestException(`${role} cannot have PAN number`);
       }
     }
 
