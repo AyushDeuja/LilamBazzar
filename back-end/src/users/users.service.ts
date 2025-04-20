@@ -126,8 +126,14 @@ export class UsersService {
       data: updateUserDto,
     });
 
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+    if (role !== 'vendor') {
+      const { organization_name, pan_no, password, ...userWithoutVendorInfo } =
+        updatedUser;
+      return userWithoutVendorInfo; // Return user data without vendor info
+    } else {
+      const { password, ...userWithoutPassword } = updatedUser;
+      return userWithoutPassword;
+    }
   }
 
   async remove(id: number) {
