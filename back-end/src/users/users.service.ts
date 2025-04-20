@@ -49,6 +49,9 @@ export class UsersService {
     const createdUser = await this.prisma.user.create({
       data: createUserDto,
     });
+
+    // Exclude organization_name and pan_no from the response when the user is not a vendor
+
     //to exclude password from the response
     const { password, ...userWithoutPassword } = createdUser;
     return userWithoutPassword;
