@@ -6,21 +6,32 @@ import { PrismaClient } from 'generated/prisma';
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaClient) {}
-  async create(createCategoryDto: CreateCategoryDto) {}
+  async create(createCategoryDto: CreateCategoryDto) {
+    return this.prisma.category.create({
+      data: createCategoryDto,
+    });
+  }
 
   async findAll() {
-    return `This action returns all categories`;
+    return this.prisma.category.findMany();
   }
 
   async findOne(id: number) {
-    return `This action returns a #${id} category`;
+    return this.prisma.category.findUnique({
+      where: { id },
+    });
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} category`;
+    return this.prisma.category.delete({
+      where: { id },
+    });
   }
 }
