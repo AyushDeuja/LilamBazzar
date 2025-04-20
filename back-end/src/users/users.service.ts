@@ -92,16 +92,17 @@ export class UsersService {
     // Check if the user role is valid
     const role = updateUserDto.user_role ?? 'customer';
     if (role === 'vendor') {
-      if (!updateUserDto.organization_name || !updateUserDto.pan_no) {
-        throw new BadRequestException(
-          'Vendors must have organization name and PAN number',
-        );
+      if (!updateUserDto.organization_name) {
+        throw new BadRequestException('Vendors must have organization name');
+      } else if (!updateUserDto.pan_no) {
+        throw new BadRequestException('Vendors must have PAN number');
       }
     } else {
-      if (updateUserDto.organization_name || updateUserDto.pan_no) {
-        throw new BadRequestException(
-          `${role} cannot have organization name or PAN number`,
-        );
+      // For customer or admin: pan_no and organization_name should not be provided
+      if (updateUserDto.organization_name) {
+        throw new BadRequestException(`${role} cannot have organization name`);
+      } else if (updateUserDto.pan_no) {
+        throw new BadRequestException(`${role} cannot have PAN number`);
       }
     }
 
