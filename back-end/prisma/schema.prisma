@@ -46,6 +46,7 @@ model User {
 model Category {
   id            Int      @id @default(autoincrement())
   category_name String   @db.VarChar(191)
+  description   String?  @db.VarChar(191)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
