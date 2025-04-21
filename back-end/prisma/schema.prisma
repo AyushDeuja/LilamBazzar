@@ -46,6 +46,7 @@ model User {
 model Category {
   id            Int      @id @default(autoincrement())
   category_name String   @db.VarChar(191)
+  category_img  String?  @db.VarChar(191)
   description   String?  @db.VarChar(191)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -58,6 +59,7 @@ model Category {
 model Product {
   id              Int      @id @default(autoincrement())
   product_name    String   @db.VarChar(191)
+  product_img     String?  @db.VarChar(191)
   base_price      Decimal  @db.Decimal(10, 2) //for bidding
   description     String?  @db.VarChar(191)
   stock           Int      @default(0)
