@@ -8,4 +8,8 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsString()
+  category_image: string;
 }
