@@ -2,11 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaClient } from 'generated/prisma';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaClient) {}
-  async create(createCategoryDto: CreateCategoryDto) {
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    file?: Express.Multer.File,
+  ) {
+    if (file) {
+      const uploadedUrl = await this.cloudinary.uploadFile(file);
+      createCategoryDto.category_img = uploadedUrl;
+    }
     return this.prisma.category.create({
       data: createCategoryDto,
     });

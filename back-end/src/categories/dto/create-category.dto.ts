@@ -11,5 +11,5 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
-  category_image: string;
+  category_img: string;
 }
