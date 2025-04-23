@@ -10,7 +10,12 @@ export class ProductsService {
     private readonly prisma: PrismaClient,
     private readonly cloudinary: CloudinaryService,
   ) {}
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
+    if (file) {
+      const uploadedUrl = await this.cloudinary.uploadFile(file);
+      createProductDto.product_img = uploadedUrl;
+    }
+
     return this.prisma.product.create({
       data: createProductDto,
     });
