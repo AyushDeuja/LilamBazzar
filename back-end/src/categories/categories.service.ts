@@ -15,7 +15,7 @@ export class CategoriesService {
     file?: Express.Multer.File,
   ) {
     if (file) {
-      const uploadedUrl = await this.cloudinary.uploadFile(file);
+      const uploadedUrl = await this.cloudinary.uploadFile(file, 'categories');
       createCategoryDto.category_img = uploadedUrl;
     }
     return this.prisma.category.create({

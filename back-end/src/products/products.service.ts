@@ -12,7 +12,7 @@ export class ProductsService {
   ) {}
   async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
     if (file) {
-      const uploadedUrl = await this.cloudinary.uploadFile(file);
+      const uploadedUrl = await this.cloudinary.uploadFile(file, 'products');
       createProductDto.product_img = uploadedUrl;
     }
 
