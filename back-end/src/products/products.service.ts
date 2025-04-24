@@ -11,6 +11,8 @@ export class ProductsService {
     private readonly cloudinary: CloudinaryService,
   ) {}
   async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
+    // createProductDto.category_id = 1;
+    // createProductDto.organization_id = 1;
     if (file) {
       const uploadedUrl = await this.cloudinary.uploadFile(file, 'products');
       createProductDto.product_img = uploadedUrl;
