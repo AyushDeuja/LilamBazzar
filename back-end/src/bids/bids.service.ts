@@ -7,7 +7,9 @@ import { PrismaClient } from 'generated/prisma';
 export class BidsService {
   constructor(private readonly prisma: PrismaClient) {}
   create(createBidDto: CreateBidDto) {
-    return 'This action adds a new bid';
+    return this.prisma.bid.create({
+      data: createBidDto,
+    });
   }
 
   findAll() {
