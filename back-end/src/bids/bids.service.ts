@@ -13,11 +13,13 @@ export class BidsService {
   }
 
   findAll() {
-    return `This action returns all bids`;
+    return this.prisma.bid.findMany();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} bid`;
+    return this.prisma.bid.findUnique({
+      where: { id },
+    });
   }
 
   update(id: number, updateBidDto: UpdateBidDto) {
