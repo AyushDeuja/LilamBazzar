@@ -83,7 +83,7 @@ model Product {
 model Bid {
   id         Int      @id @default(autoincrement())
   product_id Int      @unique
-  bidder_id  Int //should be customer 
+  bidder_id  Int      @unique //should be customer 
   bid_price  Decimal  @db.Decimal(10, 2)
   is_winner  Boolean  @default(false)
   createdAt  DateTime @default(now())

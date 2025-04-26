@@ -11,6 +11,9 @@ export class BidsService {
     const existingBid = await this.prisma.bid.findUnique({
       where: { product_id: createBidDto.product_id },
     });
+    if (existingBid) {
+      throw new Error('Product already exists');
+    }
 
     // bidder_id must be customer not admin or vendor
     const existingCusotmer = await this.prisma.user.findUnique({
@@ -24,7 +27,7 @@ export class BidsService {
     }
 
     //bidder_id must be unique
-    const existingBidder = await this.prisma.bid.findFirst({
+    const existingBidder = await this.prisma.bid.findUnique({
       where: { bidder_id: createBidDto.bidder_id },
     });
     if (existingBidder) {
