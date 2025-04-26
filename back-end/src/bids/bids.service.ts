@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
+import { PrismaClient } from 'generated/prisma';
 
 @Injectable()
 export class BidsService {
+  constructor(private readonly prisma: PrismaClient) {}
   create(createBidDto: CreateBidDto) {
     return 'This action adds a new bid';
   }
