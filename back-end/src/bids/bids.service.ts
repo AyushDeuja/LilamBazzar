@@ -23,7 +23,10 @@ export class BidsService {
   }
 
   update(id: number, updateBidDto: UpdateBidDto) {
-    return `This action updates a #${id} bid`;
+    return this.prisma.bid.update({
+      where: { id },
+      data: updateBidDto,
+    });
   }
 
   remove(id: number) {
