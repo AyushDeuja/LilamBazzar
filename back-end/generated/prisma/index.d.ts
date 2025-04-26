@@ -13063,10 +13063,10 @@ export namespace Prisma {
   export type BidWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     product_id?: number
-    bidder_id?: number
     AND?: BidWhereInput | BidWhereInput[]
     OR?: BidWhereInput[]
     NOT?: BidWhereInput | BidWhereInput[]
+    bidder_id?: IntFilter<"Bid"> | number
     bid_price?: DecimalFilter<"Bid"> | Decimal | DecimalJsLike | number | string
     is_winner?: BoolFilter<"Bid"> | boolean
     createdAt?: DateTimeFilter<"Bid"> | Date | string
@@ -13074,7 +13074,7 @@ export namespace Prisma {
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     Order?: OrderListRelationFilter
-  }, "id" | "product_id" | "bidder_id">
+  }, "id" | "product_id">
 
   export type BidOrderByWithAggregationInput = {
     id?: SortOrder

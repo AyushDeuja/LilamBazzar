@@ -7,6 +7,8 @@ import { PrismaClient } from 'generated/prisma';
 export class BidsService {
   constructor(private readonly prisma: PrismaClient) {}
   async create(createBidDto: CreateBidDto) {
+    createBidDto.product_id = 3;
+    createBidDto.bidder_id = 3;
     //product_id must be unique
     const existingProduct = await this.prisma.bid.findUnique({
       where: { product_id: createBidDto.product_id },
@@ -16,27 +18,29 @@ export class BidsService {
     }
 
     // bidder_id must be customer not admin or vendor
-    const existingCusotmer = await this.prisma.user.findUnique({
+    const isCustomer = await this.prisma.user.findUnique({
       where: { id: createBidDto.bidder_id },
     });
-    if (!existingCusotmer) {
+    if (!isCustomer) {
       throw new BadRequestException('Bidder not found');
     }
-    if (existingCusotmer.user_role !== 'customer') {
+    if (isCustomer.user_role !== 'customer') {
       throw new BadRequestException('Bidder must be a customer');
     }
 
-    //bidder_id must be unique
-    const existingBidder = await this.prisma.bid.findUnique({
-      where: { bidder_id: createBidDto.bidder_id },
+    // bid_price must be greater than base price
+    const existingProductBasePrice = await this.prisma.product.findFirst({
+      where: { id: createBidDto.product_id },
     });
-    if (existingBidder) {
-      throw new BadRequestException('Bidder already exists');
+    if (!existingProductBasePrice) {
+      throw new BadRequestException('Product not found');
     }
-
-    //bid_price must be greater than 0
-    if (createBidDto.bid_price <= 0) {
-      throw new BadRequestException('Bid price must be greater than 0');
+    if (
+      createBidDto.bid_price <= existingProductBasePrice.base_price.toNumber()
+    ) {
+      throw new BadRequestException(
+        'Bid price must be greater than base price',
+      );
     }
 
     return this.prisma.bid.create({
@@ -55,32 +59,37 @@ export class BidsService {
   }
 
   async update(id: number, updateBidDto: UpdateBidDto) {
-    const existingProduct = await this.prisma.bid.findUnique({
-      where: { product_id: updateBidDto.product_id },
-    });
-    if (existingProduct) {
-      throw new BadRequestException('Product already exists');
-    }
+    // const existingProduct = await this.prisma.bid.findUnique({
+    //   where: { product_id: updateBidDto.product_id },
+    // });
+    // if (existingProduct) {
+    //   throw new BadRequestException('Product already exists');
+    // }
 
-    const existingCusotmer = await this.prisma.user.findUnique({
+    const isCustomer = await this.prisma.user.findUnique({
       where: { id: updateBidDto.bidder_id },
     });
-    if (!existingCusotmer) {
+    if (!isCustomer) {
       throw new BadRequestException('Bidder not found');
     }
-    if (existingCusotmer.user_role !== 'customer') {
+    if (isCustomer.user_role !== 'customer') {
       throw new BadRequestException('Bidder must be a customer');
     }
 
-    const existingBidder = await this.prisma.bid.findUnique({
-      where: { bidder_id: updateBidDto.bidder_id },
+    // bid_price must be greater than base price
+    const existingProductBasePrice = await this.prisma.product.findFirst({
+      where: { id: updateBidDto.product_id },
     });
-    if (existingBidder) {
-      throw new BadRequestException('Bidder already exists');
+    if (!existingProductBasePrice) {
+      throw new BadRequestException('Product not found');
     }
-
-    if (updateBidDto.bid_price === undefined || updateBidDto.bid_price <= 0) {
-      throw new BadRequestException('Bid price must be greater than 0');
+    if (
+      updateBidDto.bid_price === undefined ||
+      updateBidDto.bid_price <= existingProductBasePrice.base_price.toNumber()
+    ) {
+      throw new BadRequestException(
+        'Bid price must be greater than base price',
+      );
     }
 
     return this.prisma.bid.update({
