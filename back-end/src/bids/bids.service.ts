@@ -6,30 +6,32 @@ import { PrismaClient } from 'generated/prisma';
 @Injectable()
 export class BidsService {
   constructor(private readonly prisma: PrismaClient) {}
-  create(createBidDto: CreateBidDto) {
+  async create(createBidDto: CreateBidDto) {
     return this.prisma.bid.create({
       data: createBidDto,
     });
   }
 
-  findAll() {
+  async findAll() {
     return this.prisma.bid.findMany();
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return this.prisma.bid.findUnique({
       where: { id },
     });
   }
 
-  update(id: number, updateBidDto: UpdateBidDto) {
+  async update(id: number, updateBidDto: UpdateBidDto) {
     return this.prisma.bid.update({
       where: { id },
       data: updateBidDto,
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bid`;
+  async remove(id: number) {
+    return this.prisma.bid.delete({
+      where: { id },
+    });
   }
 }
