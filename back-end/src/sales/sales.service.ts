@@ -23,7 +23,10 @@ export class SalesService {
   }
 
   update(id: number, updateSaleDto: UpdateSaleDto) {
-    return `This action updates a #${id} sale`;
+    return this.prisma.sale.update({
+      where: { id },
+      data: updateSaleDto,
+    });
   }
 
   remove(id: number) {
