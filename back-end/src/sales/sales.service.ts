@@ -6,30 +6,32 @@ import { PrismaClient } from 'generated/prisma';
 @Injectable()
 export class SalesService {
   constructor(private readonly prisma: PrismaClient) {}
-  create(createSaleDto: CreateSaleDto) {
+  async create(createSaleDto: CreateSaleDto) {
     return this.prisma.sale.create({
       data: createSaleDto,
     });
   }
 
-  findAll() {
+  async findAll() {
     return this.prisma.sale.findMany();
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return this.prisma.sale.findUnique({
       where: { id },
     });
   }
 
-  update(id: number, updateSaleDto: UpdateSaleDto) {
+  async update(id: number, updateSaleDto: UpdateSaleDto) {
     return this.prisma.sale.update({
       where: { id },
       data: updateSaleDto,
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} sale`;
+  async remove(id: number) {
+    return this.prisma.sale.delete({
+      where: { id },
+    });
   }
 }
