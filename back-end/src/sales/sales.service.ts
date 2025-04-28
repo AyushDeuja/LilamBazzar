@@ -7,11 +7,13 @@ import { PrismaClient } from 'generated/prisma';
 export class SalesService {
   constructor(private readonly prisma: PrismaClient) {}
   create(createSaleDto: CreateSaleDto) {
-    return 'This action adds a new sale';
+    return this.prisma.sale.create({
+      data: createSaleDto,
+    });
   }
 
   findAll() {
-    return `This action returns all sales`;
+    return this.prisma.sale.findMany();
   }
 
   findOne(id: number) {
