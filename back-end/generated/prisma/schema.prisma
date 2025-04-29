@@ -35,7 +35,6 @@ model User {
 
   Sale     Sale[]
   Purchase Purchase[]
-  Cart     Cart[]
   Product  Product[]
   Bid      Bid[]
   Order    Order[]
@@ -56,10 +55,21 @@ model Category {
   @@map("categories")
 }
 
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  img        String   @db.VarChar(191)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product_id Int
+  product    Product  @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
+}
+
 model Product {
   id              Int      @id @default(autoincrement())
   product_name    String   @db.VarChar(191)
-  product_img     String?  @db.VarChar(191)
+  // product_img     String?  @db.VarChar(191)
   base_price      Decimal  @db.Decimal(10, 2) //for bidding
   description     String?  @db.VarChar(191)
   stock           Int      @default(0)
@@ -73,9 +83,9 @@ model Product {
 
   sales        Sale[]
   Purchase     Purchase[]
-  Cart         Cart[]
   Bid          Bid[]
   OrderHasItem OrderHasItem[]
+  ProductImage ProductImage[]
 
   @@map("products")
 }
@@ -83,7 +93,7 @@ model Product {
 model Bid {
   id         Int      @id @default(autoincrement())
   product_id Int      @unique
-  bidder_id  Int      @unique //should be customer 
+  bidder_id  Int //should be customer 
   bid_price  Decimal  @db.Decimal(10, 2)
   is_winner  Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -98,10 +108,12 @@ model Bid {
 
 model Sale {
   id         Int      @id @default(autoincrement())
-  user_id    Int
+  user_id    Int //must be vendor
   product_id Int
   quantity   Int
+  commission Decimal  @db.Decimal(10, 2)
   total      Decimal  @db.Decimal(10, 2)
+  tax        Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -124,20 +136,6 @@ model Purchase {
   product Product @relation(fields: [product_id], references: [id])
 
   @@map("purchases")
-}
-
-model Cart {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  product_id Int
-  quantity   Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  user    User    @relation(fields: [user_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
-
-  @@map("carts")
 }
 
 model Order {
