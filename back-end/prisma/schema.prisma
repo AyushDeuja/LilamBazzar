@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -55,17 +54,6 @@ model Category {
   @@map("categories")
 }
 
-model ProductImage {
-  id         Int      @id @default(autoincrement())
-  img        String   @db.VarChar(191)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  product_id Int
-  product    Product  @relation(fields: [product_id], references: [id])
-
-  @@map("product_images")
-}
-
 model Product {
   id              Int      @id @default(autoincrement())
   product_name    String   @db.VarChar(191)
@@ -88,6 +76,17 @@ model Product {
   ProductImage ProductImage[]
 
   @@map("products")
+}
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+  product_img String   @db.VarChar(191)
+  product_id  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
 }
 
 model Bid {

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { PrismaClient } from 'generated/prisma';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { PrismaClient } from '@prisma/client';
 
 @Module({
   controllers: [ProductsController],

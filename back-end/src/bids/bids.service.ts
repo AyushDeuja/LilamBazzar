@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
-import { PrismaClient } from 'generated/prisma';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class BidsService {

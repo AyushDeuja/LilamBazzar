@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { PrismaClient } from 'generated/prisma';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PrismaClient } from 'generated/prisma';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -11,16 +11,20 @@ export class ProductsService {
     private readonly cloudinary: CloudinaryService,
   ) {}
   async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
-    // createProductDto.category_id = 1;
-    // createProductDto.organization_id = 1;
-    if (file) {
-      const uploadedUrl = await this.cloudinary.uploadFile(file, 'products');
-      createProductDto.product_img = uploadedUrl;
-    }
-
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: createProductDto,
     });
+
+    // save the product image to the database
+    if (createProductDto.product_img) {
+      const uploadedUrl = await this.cloudinary.uploadFile(file, 'products');
+      await this.prisma.productImage.create({
+        data: {
+          product_id: product.id,
+          product_img: uploadedUrl,
+        },
+      });
+    }
   }
 
   async findAll() {
