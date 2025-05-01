@@ -16,4 +16,12 @@ export class CreateSaleDto {
   @IsNotEmpty()
   @IsDecimal()
   total: number;
+
+  @IsNotEmpty()
+  @IsDecimal()
+  commission: number;
+
+  @IsNotEmpty()
+  @IsDecimal()
+  tax: number;
 }
