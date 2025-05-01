@@ -5,8 +5,10 @@ import { v2 as cloudinary } from 'cloudinary';
 export class CloudinaryService {
   async uploadFile(image: string, folder: string): Promise<string> {
     try {
-      const result = await cloudinary.uploader.upload(image);
-      return result?.secure_url;
+      const result = await cloudinary.uploader.upload(image, {
+        folder,
+      });
+      return result.secure_url; // Return the uploaded image URL
     } catch (error) {
       throw new Error(`Cloudinary upload failed: ${error.message}`);
     }
