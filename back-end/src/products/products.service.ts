@@ -10,41 +10,91 @@ export class ProductsService {
     private readonly prisma: PrismaClient,
     private readonly cloudinary: CloudinaryService,
   ) {}
-  async create(createProductDto: CreateProductDto, file?: Express.Multer.File) {
+
+  // Create a new product with multiple base64 images
+  async create(createProductDto: CreateProductDto) {
+    // Create the product first (without images)
     const product = await this.prisma.product.create({
       data: createProductDto,
     });
 
-    // save the product image to the database
-    if (createProductDto.product_img) {
-      const uploadedUrl = await this.cloudinary.uploadFile(file, 'products');
-      await this.prisma.productImage.create({
-        data: {
+    // Check if multiple base64 images are provided in the DTO
+    if (
+      createProductDto.product_imgs &&
+      createProductDto.product_imgs.length > 0
+    ) {
+      // Upload each base64 image to Cloudinary
+      const uploadPromises = createProductDto.product_imgs.map(
+        (image: string) => this.cloudinary.uploadFile(image, 'products'),
+      );
+
+      // Wait for all uploads to complete
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Save the uploaded image URLs in the ProductImage table
+      await this.prisma.productImage.createMany({
+        data: uploadedUrls.map((url) => ({
           product_id: product.id,
-          product_img: uploadedUrl,
-        },
+          product_img: url,
+        })),
       });
     }
+
+    return product;
   }
 
+  // Fetch all products along with their associated images
   async findAll() {
-    return this.prisma.product.findMany({ include: { ProductImage: true } });
-  }
-
-  async findOne(id: number) {
-    return this.prisma.product.findUnique({
-      where: { id },
+    return this.prisma.product.findMany({
+      include: { ProductImage: true }, // Include related ProductImage entries
     });
   }
 
+  // Fetch a single product by id along with its associated images
+  async findOne(id: number) {
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: { ProductImage: true }, // Include related ProductImage entries
+    });
+  }
+
+  // Update an existing product, including handling new images
   async update(id: number, updateProductDto: UpdateProductDto) {
+    // If new images are provided, upload them and save in ProductImage table
+    if (
+      updateProductDto.product_imgs &&
+      updateProductDto.product_imgs.length > 0
+    ) {
+      const uploadPromises = updateProductDto.product_imgs.map(
+        (image: string) => this.cloudinary.uploadFile(image, 'products'),
+      );
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Optionally delete old images
+      await this.prisma.productImage.deleteMany({ where: { product_id: id } });
+
+      // Save the new uploaded URLs in the ProductImage table
+      await this.prisma.productImage.createMany({
+        data: uploadedUrls.map((url) => ({
+          product_id: id,
+          product_img: url,
+        })),
+      });
+    }
+
+    // Update the product's other fields (without changing images)
     return this.prisma.product.update({
       where: { id },
       data: updateProductDto,
     });
   }
 
+  // Remove a product and optionally delete its images
   async remove(id: number) {
+    // Optionally delete related product images
+    await this.prisma.productImage.deleteMany({ where: { product_id: id } });
+
+    // Delete the product itself
     return this.prisma.product.delete({
       where: { id },
     });
