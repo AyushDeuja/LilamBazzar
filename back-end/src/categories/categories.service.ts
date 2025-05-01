@@ -10,14 +10,12 @@ export class CategoriesService {
     private readonly prisma: PrismaClient,
     private readonly cloudinary: CloudinaryService,
   ) {}
-  async create(
-    createCategoryDto: CreateCategoryDto,
-    private readonly cloudinary: CloudinaryService,
-  ) {
-    if (createBookDto.book_img) {
-      createBookDto.book_img = await this.cloudinary.uploadFile(
-        createBookDto.book_img,
+  async create(createCategoryDto: CreateCategoryDto) {
+    if (createCategoryDto.category_img) {
+      createCategoryDto.category_img = await this.cloudinary.uploadFile(
+        createCategoryDto.category_img,
       );
+    }
     return this.prisma.category.create({
       data: createCategoryDto,
     });
