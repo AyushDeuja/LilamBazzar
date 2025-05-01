@@ -44,7 +44,7 @@ model User {
 model Category {
   id            Int      @id @default(autoincrement())
   category_name String   @db.VarChar(191)
-  category_img  String?  @db.VarChar(191)
+  category_img  String?  @db.Text
   description   String?  @db.VarChar(191)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -80,7 +80,7 @@ model Product {
 
 model ProductImage {
   id          Int      @id @default(autoincrement())
-  product_img String   @db.VarChar(191)
+  product_img String   @db.Text
   product_id  Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
