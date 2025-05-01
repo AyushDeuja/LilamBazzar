@@ -33,6 +33,13 @@ export class CategoriesService {
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    if (updateCategoryDto.category_img) {
+      // Upload the new category image to Cloudinary
+      updateCategoryDto.category_img = await this.cloudinary.uploadFile(
+        updateCategoryDto.category_img,
+        'categories',
+      );
+    }
     return this.prisma.category.update({
       where: { id },
       data: updateCategoryDto,
