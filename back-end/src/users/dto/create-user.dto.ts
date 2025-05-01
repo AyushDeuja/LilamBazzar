@@ -1,3 +1,4 @@
+import { roleType } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -7,7 +8,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { roleType } from 'generated/prisma';
 
 export class CreateUserDto {
   @IsString()
