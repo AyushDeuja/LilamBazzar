@@ -20,12 +20,12 @@ export class ProductsService {
 
     // Check if multiple base64 images are provided in the DTO
     if (
-      createProductDto.product_imgs &&
-      createProductDto.product_imgs.length > 0
+      createProductDto.product_img &&
+      createProductDto.product_img.length > 0
     ) {
       // Upload each base64 image to Cloudinary
-      const uploadPromises = createProductDto.product_imgs.map(
-        (image: string) => this.cloudinary.uploadFile(image, 'products'),
+      const uploadPromises = createProductDto.product_img.map((image: string) =>
+        this.cloudinary.uploadFile(image, 'products'),
       );
 
       // Wait for all uploads to complete
@@ -62,11 +62,11 @@ export class ProductsService {
   async update(id: number, updateProductDto: UpdateProductDto) {
     // If new images are provided, upload them and save in ProductImage table
     if (
-      updateProductDto.product_imgs &&
-      updateProductDto.product_imgs.length > 0
+      updateProductDto.product_img &&
+      updateProductDto.product_img.length > 0
     ) {
-      const uploadPromises = updateProductDto.product_imgs.map(
-        (image: string) => this.cloudinary.uploadFile(image, 'products'),
+      const uploadPromises = updateProductDto.product_img.map((image: string) =>
+        this.cloudinary.uploadFile(image, 'products'),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
 
