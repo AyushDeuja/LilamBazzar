@@ -13,25 +13,24 @@ export class ProductsService {
 
   // Create a new product with multiple base64 images
   async create(createProductDto: CreateProductDto) {
-    // Create the product first (without images)
+    createProductDto.category_id = 20;
+    createProductDto.organization_id = 1;
+
+    const { product_img = [], ...productData } = createProductDto;
+
+    // Create the product (without images)
     const product = await this.prisma.product.create({
-      data: createProductDto,
+      data: productData,
     });
 
-    // Check if multiple base64 images are provided in the DTO
-    if (
-      createProductDto.product_img &&
-      createProductDto.product_img.length > 0
-    ) {
-      // Upload each base64 image to Cloudinary
-      const uploadPromises = createProductDto.product_img.map((image: string) =>
-        this.cloudinary.uploadFile(image, 'products'),
+    // Handle image uploads
+    if (product_img?.length > 0) {
+      const uploadedUrls = await Promise.all(
+        product_img.map((img: string) =>
+          this.cloudinary.uploadFile(img, 'products'),
+        ),
       );
 
-      // Wait for all uploads to complete
-      const uploadedUrls = await Promise.all(uploadPromises);
-
-      // Save the uploaded image URLs in the ProductImage table
       await this.prisma.productImage.createMany({
         data: uploadedUrls.map((url) => ({
           product_id: product.id,
@@ -40,40 +39,50 @@ export class ProductsService {
       });
     }
 
-    return product;
-  }
-
-  // Fetch all products along with their associated images
-  async findAll() {
-    return this.prisma.product.findMany({
-      include: { ProductImage: true }, // Include related ProductImage entries
+    // Return product with images
+    return this.prisma.product.findUnique({
+      where: { id: product.id },
+      include: { ProductImage: true },
     });
   }
 
-  // Fetch a single product by id along with its associated images
+  // Fetch all products with images
+  async findAll() {
+    return this.prisma.product.findMany({
+      include: { ProductImage: true },
+    });
+  }
+
+  // Fetch a single product with images
   async findOne(id: number) {
     return this.prisma.product.findUnique({
       where: { id },
-      include: { ProductImage: true }, // Include related ProductImage entries
+      include: { ProductImage: true },
     });
   }
 
-  // Update an existing product, including handling new images
+  // Update a product and its images
   async update(id: number, updateProductDto: UpdateProductDto) {
-    // If new images are provided, upload them and save in ProductImage table
-    if (
-      updateProductDto.product_img &&
-      updateProductDto.product_img.length > 0
-    ) {
-      const uploadPromises = updateProductDto.product_img.map((image: string) =>
-        this.cloudinary.uploadFile(image, 'products'),
-      );
-      const uploadedUrls = await Promise.all(uploadPromises);
+    const { product_img = [], ...updateData } = updateProductDto;
 
-      // Optionally delete old images
+    // Update the product's fields
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: updateData,
+    });
+
+    // Handle image updates (if any)
+    if (product_img?.length > 0) {
+      // Delete old images
       await this.prisma.productImage.deleteMany({ where: { product_id: id } });
 
-      // Save the new uploaded URLs in the ProductImage table
+      // Upload new ones
+      const uploadedUrls = await Promise.all(
+        product_img.map((img: string) =>
+          this.cloudinary.uploadFile(img, 'products'),
+        ),
+      );
+
       await this.prisma.productImage.createMany({
         data: uploadedUrls.map((url) => ({
           product_id: id,
@@ -82,21 +91,22 @@ export class ProductsService {
       });
     }
 
-    // Update the product's other fields (without changing images)
-    return this.prisma.product.update({
+    // Return updated product with images
+    return this.prisma.product.findUnique({
       where: { id },
-      data: updateProductDto,
+      include: { ProductImage: true },
     });
   }
 
-  // Remove a product and optionally delete its images
+  // Delete a product and its images
   async remove(id: number) {
-    // Optionally delete related product images
+    // Delete related images first
     await this.prisma.productImage.deleteMany({ where: { product_id: id } });
 
-    // Delete the product itself
+    // Delete product and return it
     return this.prisma.product.delete({
       where: { id },
+      include: { ProductImage: true },
     });
   }
 }

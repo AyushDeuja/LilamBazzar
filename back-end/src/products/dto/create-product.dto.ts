@@ -14,8 +14,8 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
-  @IsString() // Validate each element as a string
-  product_img: string[]; // Array of base64 image strings
+  @IsString({ each: true }) // Validate each element as a string
+  product_img?: string[]; // Array of base64 image strings
 
   @IsNotEmpty()
   @IsDecimal()
