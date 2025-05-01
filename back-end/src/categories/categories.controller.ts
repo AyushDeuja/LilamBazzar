@@ -19,7 +19,6 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('category_img')) //for cloudinary image
   create(
     @UploadedFile() file: Express.Multer.File, // for cloudinary image
     @Body() createCategoryDto: CreateCategoryDto,

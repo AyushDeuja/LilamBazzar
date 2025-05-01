@@ -12,12 +12,12 @@ export class CategoriesService {
   ) {}
   async create(
     createCategoryDto: CreateCategoryDto,
-    file?: Express.Multer.File,
+    private readonly cloudinary: CloudinaryService,
   ) {
-    if (file) {
-      const uploadedUrl = await this.cloudinary.uploadFile(file, 'categories');
-      createCategoryDto.category_img = uploadedUrl;
-    }
+    if (createBookDto.book_img) {
+      createBookDto.book_img = await this.cloudinary.uploadFile(
+        createBookDto.book_img,
+      );
     return this.prisma.category.create({
       data: createCategoryDto,
     });
