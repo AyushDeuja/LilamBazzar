@@ -14,6 +14,7 @@ export class CategoriesService {
     if (createCategoryDto.category_img) {
       createCategoryDto.category_img = await this.cloudinary.uploadFile(
         createCategoryDto.category_img,
+        'categories',
       );
     }
     return this.prisma.category.create({
