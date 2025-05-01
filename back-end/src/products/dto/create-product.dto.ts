@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDecimal,
   IsNotEmpty,
   IsNumber,
@@ -12,8 +13,9 @@ export class CreateProductDto {
   product_name: string;
 
   @IsOptional()
-  @IsString()
-  product_img: string;
+  @IsArray()
+  @IsString() // Validate each element as a string
+  product_imgs: string[]; // Array of base64 image strings
 
   @IsNotEmpty()
   @IsDecimal()
