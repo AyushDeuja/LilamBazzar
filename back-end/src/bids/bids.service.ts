@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 export class BidsService {
   constructor(private readonly prisma: PrismaClient) {}
   async create(createBidDto: CreateBidDto) {
-    createBidDto.product_id = 3;
+    createBidDto.product_id = 7;
     createBidDto.bidder_id = 3;
     //product_id must be unique
     const existingProduct = await this.prisma.bid.findUnique({

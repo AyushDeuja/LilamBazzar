@@ -13,8 +13,8 @@ export class ProductsService {
 
   // Create a new product with multiple base64 images
   async create(createProductDto: CreateProductDto) {
-    createProductDto.category_id = 20;
-    createProductDto.organization_id = 1;
+    // createProductDto.category_id = 20;
+    // createProductDto.organization_id = 1;
 
     const { product_img = [], ...productData } = createProductDto;
 
