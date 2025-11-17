@@ -12,7 +12,11 @@ export class UsersService {
     // Check if the user already exists by email or mobile
     const existingUser = await this.prisma.user.findFirst({
       where: {
-        OR: [{ email: createUserDto.email }, { mobile: createUserDto.mobile }],
+        OR: [
+          { email: createUserDto.email },
+          { mobile: createUserDto.mobile },
+          { pan_no: createUserDto.pan_no },
+        ],
       },
     });
 
@@ -22,6 +26,9 @@ export class UsersService {
       }
       if (existingUser.mobile === createUserDto.mobile) {
         throw new BadRequestException('This mobile number is already in use');
+      }
+      if (existingUser.pan_no === createUserDto.pan_no) {
+        throw new BadRequestException('This PAN number is already in use');
       }
     }
 
