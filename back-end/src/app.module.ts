@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ProductsModule } from './products/products.module';
-import { BidsModule } from './bids/bids.module';
 import { SalesModule } from './sales/sales.module';
 
 @Module({
@@ -14,7 +13,6 @@ import { SalesModule } from './sales/sales.module';
     CategoriesModule,
     CloudinaryModule,
     ProductsModule,
-    BidsModule,
     SalesModule,
   ],
   controllers: [AppController],

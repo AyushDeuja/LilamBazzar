@@ -37,6 +37,7 @@ model User {
   Product  Product[]
   Bid      Bid[]
   Order    Order[]
+  Auction  Auction[]  @relation("AuctionWinner")
 
   @@map("users")
 }
@@ -54,30 +55,6 @@ model Category {
   @@map("categories")
 }
 
-model Product {
-  id              Int      @id @default(autoincrement())
-  product_name    String   @db.VarChar(191)
-  // product_img     String?  @db.VarChar(191)
-  base_price      Decimal  @db.Decimal(10, 2) //for bidding
-  description     String?  @db.VarChar(191)
-  stock           Int      @default(0)
-  category_id     Int
-  organization_id Int // should be vendor
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  category Category @relation(fields: [category_id], references: [id])
-  user     User     @relation(fields: [organization_id], references: [id])
-
-  sales        Sale[]
-  Purchase     Purchase[]
-  Bid          Bid[]
-  OrderHasItem OrderHasItem[]
-  ProductImage ProductImage[]
-
-  @@map("products")
-}
-
 model ProductImage {
   id          Int      @id @default(autoincrement())
   product_img String   @db.Text
@@ -89,18 +66,67 @@ model ProductImage {
   @@map("product_images")
 }
 
+model Product {
+  id              Int      @id @default(autoincrement())
+  product_name    String   @db.VarChar(191)
+  // product_img     String?  @db.VarChar(191)
+  description     String?  @db.VarChar(191)
+  stock           Int      @default(0)
+  category_id     Int
+  organization_id Int // should be vendor
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  fixed_price      Decimal?  @db.Decimal(10, 2) // null = auction only
+  base_price       Decimal?  @db.Decimal(10, 2) // starting bid price, only if auction
+  is_auction       Boolean   @default(false)
+  auction_end_time DateTime?
+
+  category Category @relation(fields: [category_id], references: [id])
+  user     User     @relation(fields: [organization_id], references: [id])
+
+  sales        Sale[]
+  Purchase     Purchase[]
+  OrderHasItem OrderHasItem[]
+  ProductImage ProductImage[]
+  auction      Auction?       @relation("ProductAuction")
+
+  @@index([is_auction])
+  @@index([auction_end_time])
+  @@index([category_id])
+  @@index([organization_id])
+}
+
+model Auction {
+  id             Int      @id @default(autoincrement())
+  product_id     Int      @unique
+  start_time     DateTime @default(now())
+  end_time       DateTime
+  starting_price Decimal  @db.Decimal(10, 2)
+  current_price  Decimal? @db.Decimal(10, 2)
+  winner_id      Int?
+  is_active      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  product Product @relation("ProductAuction", fields: [product_id], references: [id])
+  winner  User?   @relation("AuctionWinner", fields: [winner_id], references: [id])
+  bids    Bid[]
+
+  @@index([end_time])
+  @@index([is_active])
+}
+
 model Bid {
   id         Int      @id @default(autoincrement())
-  product_id Int      @unique
-  bidder_id  Int //should be customer 
-  bid_price  Decimal  @db.Decimal(10, 2)
-  is_winner  Boolean  @default(false)
+  auction_id Int
+  bidder_id  Int
+  bid_amount Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
-  user    User    @relation(fields: [bidder_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
-  Order   Order[]
+  auction Auction @relation(fields: [auction_id], references: [id])
+  bidder  User    @relation(fields: [bidder_id], references: [id])
+  orders  Order[]
 
   @@map("bids")
 }
@@ -139,18 +165,18 @@ model Purchase {
 
 model Order {
   id            Int      @id @default(autoincrement())
-  order_no      Int
-  total_amount  Int
+  order_no      String   @unique @default(cuid())
+  total_amount  Decimal  @db.Decimal(12, 2)
   is_delivered  Boolean  @default(false)
   has_confirmed Boolean  @default(false)
   is_paid       Boolean  @default(false)
   order_by      Int
-  bid_id        Int
+  bid_id        Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   user         User           @relation(fields: [order_by], references: [id])
-  bid          Bid            @relation(fields: [bid_id], references: [id])
+  bid          Bid?           @relation(fields: [bid_id], references: [id])
   OrderHasItem OrderHasItem[]
 
   @@map("orders")
