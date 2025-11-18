@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -36,7 +40,7 @@ export class ProductsService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     if (user.user_role !== 'vendor') {
@@ -110,16 +114,43 @@ export class ProductsService {
   // Fetch all products with images
   async findAll() {
     return this.prisma.product.findMany({
-      include: { ProductImage: true },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ProductImage: true,
+        auction: {
+          select: {
+            current_price: true,
+            end_time: true,
+            is_active: true,
+          },
+        },
+        category: { select: { category_name: true } },
+        user: { select: { name: true, organization_name: true } },
+      },
     });
   }
 
   // Fetch a single product with images
   async findOne(id: number) {
-    return this.prisma.product.findUnique({
+    const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { ProductImage: true },
+      include: {
+        ProductImage: true,
+        auction: {
+          include: {
+            bids: {
+              orderBy: { bid_amount: 'desc' },
+              take: 10,
+            },
+          },
+        },
+        category: { select: { category_name: true } },
+        user: { select: { name: true, organization_name: true } },
+      },
     });
+
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 
   // Update a product and its images
@@ -160,14 +191,33 @@ export class ProductsService {
   }
 
   // Delete a product and its images
-  async remove(id: number) {
-    // Delete related images first
-    await this.prisma.productImage.deleteMany({ where: { product_id: id } });
-
-    // Delete product and return it
-    return this.prisma.product.delete({
+  async remove(id: number, organization_id: number) {
+    const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { ProductImage: true },
+      select: { organization_id: true, auction: true },
+    });
+
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.organization_id !== organization_id)
+      throw new ForbiddenException('You can only delete your own products');
+
+    return this.prisma.$transaction(async (tx) => {
+      // delete product image first
+      await tx.productImage.deleteMany({ where: { product_id: id } });
+
+      // delete the auction if exists
+      if (product.auction) {
+        await tx.auction.delete({ where: { id: product.auction.id } });
+      }
+
+      // delete the product
+      return tx.product.delete({
+        where: { id },
+        include: {
+          ProductImage: true,
+          auction: true,
+        },
+      });
     });
   }
 }

@@ -35,8 +35,12 @@ export class ProductsController {
     return this.productsService.update(+id, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  //temporaryy fix until jwt guards are added
+  @Delete(':id/:organization_id')
+  async remove(
+    @Param('id') id: string,
+    @Param('organization_id') organization_id: string,
+  ) {
+    return this.productsService.remove(+id, +organization_id);
   }
 }
