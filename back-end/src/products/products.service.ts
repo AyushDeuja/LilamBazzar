@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -30,6 +30,18 @@ export class ProductsService {
       // organization_id = vendorId,
       ...rest
     } = createProductDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: organization_id },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.user_role !== 'vendor') {
+      throw new ForbiddenException('Only vendors can create products');
+    }
 
     const productData: any = {
       product_name,
