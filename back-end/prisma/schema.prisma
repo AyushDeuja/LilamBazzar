@@ -115,6 +115,7 @@ model Auction {
 
   @@index([end_time])
   @@index([is_active])
+  @@index([start_time])
 }
 
 model Bid {

@@ -16,33 +16,82 @@ export class ProductsService {
     // createProductDto.category_id = 20;
     // createProductDto.organization_id = 1;
 
-    const { product_img = [], ...productData } = createProductDto;
+    const {
+      product_img = [],
+      category_id,
+      is_auction = false,
+      fixed_price,
+      base_price,
+      auction_end_time,
+      description,
+      product_name,
+      stock,
+      organization_id,
+      // organization_id = vendorId,
+      ...rest
+    } = createProductDto;
 
-    // Create the product (without images)
-    const product = await this.prisma.product.create({
-      data: productData,
-    });
+    const productData: any = {
+      product_name,
+      description: description ?? null,
+      stock,
+      category_id,
+      organization_id,
+      is_auction,
+      fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
+      base_price: is_auction ? Number(base_price) : null,
+      auction_end_time: is_auction ? auction_end_time : null,
+      ...rest,
+    };
 
-    // Handle image uploads
-    if (product_img?.length > 0) {
-      const uploadedUrls = await Promise.all(
-        product_img.map((img: string) =>
-          this.cloudinary.uploadFile(img, 'products'),
-        ),
-      );
-
-      await this.prisma.productImage.createMany({
-        data: uploadedUrls.map((url) => ({
-          product_id: product.id,
-          product_img: url,
-        })),
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: productData,
       });
-    }
 
-    // Return product with images
-    return this.prisma.product.findUnique({
-      where: { id: product.id },
-      include: { ProductImage: true },
+      if (is_auction && base_price != null && auction_end_time) {
+        await tx.auction.create({
+          data: {
+            product_id: product.id,
+            start_time: new Date(),
+            end_time: auction_end_time,
+            starting_price: Number(base_price),
+            current_price: Number(base_price),
+          },
+        });
+      }
+
+      if (product_img?.length > 0) {
+        const uploadedUrls = await Promise.all(
+          product_img.map((img: string) =>
+            this.cloudinary.uploadFile(img, 'products'),
+          ),
+        );
+
+        await tx.productImage.createMany({
+          data: uploadedUrls.map((url) => ({
+            product_id: product.id,
+            product_img: url,
+          })),
+        });
+      }
+
+      return tx.product.findUnique({
+        where: { id: product.id },
+        include: {
+          ProductImage: { orderBy: { id: 'asc' } },
+          auction: {
+            include: {
+              bids: {
+                orderBy: { bid_amount: 'desc' },
+                take: 5, // Get the 5 highest bids
+              },
+            },
+          },
+          category: { select: { category_name: true } },
+          user: { select: { name: true, organization_name: true } },
+        },
+      });
     });
   }
 
