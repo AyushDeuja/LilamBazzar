@@ -170,34 +170,80 @@ export class ProductsService {
       ...rest
     } = updateProductDto;
 
-    // const { product_img = [], ...updateData } = updateProductDto;
-    // // Update the product's fields
-    // const updatedProduct = await this.prisma.product.update({
-    //   where: { id },
-    //   data: updateData,
-    // });
-    // // Handle image updates (if any)
-    // if (product_img?.length > 0) {
-    //   // Delete old images
-    //   await this.prisma.productImage.deleteMany({ where: { product_id: id } });
-    //   // Upload new ones
-    //   const uploadedUrls = await Promise.all(
-    //     product_img.map((img: string) =>
-    //       this.cloudinary.uploadFile(img, 'products'),
-    //     ),
-    //   );
-    //   await this.prisma.productImage.createMany({
-    //     data: uploadedUrls.map((url) => ({
-    //       product_id: id,
-    //       product_img: url,
-    //     })),
-    //   });
-    // }
-    // // Return updated product with images
-    // return this.prisma.product.findUnique({
-    //   where: { id },
-    //   include: { ProductImage: true },
-    // });
+    const user = await this.prisma.user.findUnique({
+      where: { id: organization_id },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.user_role !== 'vendor') {
+      throw new ForbiddenException('Only vendors can update products');
+    }
+
+    const productData: any = {
+      product_name,
+      description: description ?? null,
+      stock,
+      category_id,
+      organization_id,
+      is_auction,
+      fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
+      base_price: is_auction ? Number(base_price) : null,
+      auction_end_time: is_auction ? auction_end_time : null,
+      ...rest,
+    };
+
+    return this.prisma.$transaction(async (tx) => {
+      const updatedProductData = await tx.product.update({
+        where: { id },
+        data: productData,
+      });
+
+      if (is_auction && base_price != null && auction_end_time) {
+        await tx.auction.update({
+          where: { id },
+          data: {
+            product_id: updatedProductData.id,
+            start_time: new Date(),
+            end_time: auction_end_time,
+            starting_price: Number(base_price),
+            current_price: Number(base_price),
+          },
+        });
+      }
+
+      if (product_img?.length > 0) {
+        const uploadedUrls = await Promise.all(
+          product_img.map((img: string) =>
+            this.cloudinary.uploadFile(img, 'products'),
+          ),
+        );
+
+        await tx.productImage.createMany({
+          data: uploadedUrls.map((url) => ({
+            product_id: id,
+            product_img: url,
+          })),
+        });
+      }
+
+      return tx.product.findUnique({
+        where: { id },
+        include: {
+          ProductImage: { orderBy: { id: 'asc' } },
+          auction: {
+            include: {
+              bids: {
+                orderBy: { bid_amount: 'desc' },
+                take: 5,
+              },
+            },
+          },
+          category: { select: { category_name: true } },
+          user: { select: { name: true, organization_name: true } },
+        },
+      });
+    });
   }
 
   // Delete a product and its images
