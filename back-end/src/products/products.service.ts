@@ -180,6 +180,16 @@ export class ProductsService {
       throw new ForbiddenException('Only vendors can update products');
     }
 
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: { auction: true },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+
+    if (product.organization_id != organization_id) {
+      throw new ForbiddenException('You can only update your own products');
+    }
+
     const productData: any = {
       product_name,
       description: description ?? null,
@@ -187,23 +197,32 @@ export class ProductsService {
       category_id,
       organization_id,
       is_auction,
-      fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
-      base_price: is_auction ? Number(base_price) : null,
+      fixed_price: is_auction
+        ? null
+        : fixed_price
+          ? Number(fixed_price)
+          : undefined,
+      base_price: is_auction ? Number(base_price) : undefined,
       auction_end_time: is_auction ? auction_end_time : null,
       ...rest,
     };
 
     return this.prisma.$transaction(async (tx) => {
-      const updatedProductData = await tx.product.update({
+      //updating the main product
+      await tx.product.update({
         where: { id },
         data: productData,
       });
 
-      if (is_auction && base_price != null && auction_end_time) {
-        await tx.auction.update({
-          where: { id },
+      if (
+        is_auction &&
+        !product.auction &&
+        base_price != null &&
+        auction_end_time
+      ) {
+        await tx.auction.create({
           data: {
-            product_id: updatedProductData.id,
+            product_id: id,
             start_time: new Date(),
             end_time: auction_end_time,
             starting_price: Number(base_price),
@@ -213,12 +232,13 @@ export class ProductsService {
       }
 
       if (product_img?.length > 0) {
+        //delete old images
+        await tx.productImage.deleteMany({ where: { product_id: id } });
         const uploadedUrls = await Promise.all(
           product_img.map((img: string) =>
             this.cloudinary.uploadFile(img, 'products'),
           ),
         );
-
         await tx.productImage.createMany({
           data: uploadedUrls.map((url) => ({
             product_id: id,
