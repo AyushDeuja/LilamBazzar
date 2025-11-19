@@ -155,39 +155,49 @@ export class ProductsService {
 
   // Update a product and its images
   async update(id: number, updateProductDto: UpdateProductDto) {
-    const { product_img = [], ...updateData } = updateProductDto;
+    const {
+      product_img = [],
+      category_id,
+      is_auction = false,
+      fixed_price,
+      base_price,
+      auction_end_time,
+      description,
+      product_name,
+      stock,
+      organization_id,
+      // organization_id = vendorId,
+      ...rest
+    } = updateProductDto;
 
-    // Update the product's fields
-    const updatedProduct = await this.prisma.product.update({
-      where: { id },
-      data: updateData,
-    });
-
-    // Handle image updates (if any)
-    if (product_img?.length > 0) {
-      // Delete old images
-      await this.prisma.productImage.deleteMany({ where: { product_id: id } });
-
-      // Upload new ones
-      const uploadedUrls = await Promise.all(
-        product_img.map((img: string) =>
-          this.cloudinary.uploadFile(img, 'products'),
-        ),
-      );
-
-      await this.prisma.productImage.createMany({
-        data: uploadedUrls.map((url) => ({
-          product_id: id,
-          product_img: url,
-        })),
-      });
-    }
-
-    // Return updated product with images
-    return this.prisma.product.findUnique({
-      where: { id },
-      include: { ProductImage: true },
-    });
+    // const { product_img = [], ...updateData } = updateProductDto;
+    // // Update the product's fields
+    // const updatedProduct = await this.prisma.product.update({
+    //   where: { id },
+    //   data: updateData,
+    // });
+    // // Handle image updates (if any)
+    // if (product_img?.length > 0) {
+    //   // Delete old images
+    //   await this.prisma.productImage.deleteMany({ where: { product_id: id } });
+    //   // Upload new ones
+    //   const uploadedUrls = await Promise.all(
+    //     product_img.map((img: string) =>
+    //       this.cloudinary.uploadFile(img, 'products'),
+    //     ),
+    //   );
+    //   await this.prisma.productImage.createMany({
+    //     data: uploadedUrls.map((url) => ({
+    //       product_id: id,
+    //       product_img: url,
+    //     })),
+    //   });
+    // }
+    // // Return updated product with images
+    // return this.prisma.product.findUnique({
+    //   where: { id },
+    //   include: { ProductImage: true },
+    // });
   }
 
   // Delete a product and its images
