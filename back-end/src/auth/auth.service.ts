@@ -9,17 +9,18 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { compare } from 'bcrypt';
+import { updateProfileDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaClient,
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const user = await this.userService.create(registerDto);
+    const user = await this.usersService.create(registerDto);
 
     const token = await this.jwtService.signAsync(user);
 
@@ -44,5 +45,13 @@ export class AuthService {
 
     const token = await this.jwtService.signAsync(user);
     return { token };
+  }
+
+  async profile(user_id: number) {
+    return this.usersService.findOne(user_id);
+  }
+
+  async updateProfile(user_id: number, updateProfileDto: updateProfileDto) {
+    return this.usersService.update(user_id, updateProfileDto);
   }
 }
