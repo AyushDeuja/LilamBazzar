@@ -7,6 +7,7 @@ async function bootstrap() {
 
   //Middleware here
   app.useGlobalPipes(new ValidationPipe());
+  // app.useGlobalGuards(new Authguar)
 
   await app.listen(process.env.PORT ?? 4000);
 }
