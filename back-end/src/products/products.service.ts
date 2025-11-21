@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -17,9 +18,6 @@ export class ProductsService {
 
   // Create a new product with multiple base64 images
   async create(createProductDto: CreateProductDto) {
-    // createProductDto.category_id = 20;
-    // createProductDto.organization_id = 1;
-
     const {
       product_img = [],
       category_id,
@@ -198,12 +196,8 @@ export class ProductsService {
       category_id,
       organization_id,
       is_auction,
-      fixed_price: is_auction
-        ? null
-        : fixed_price
-          ? Number(fixed_price)
-          : undefined,
-      base_price: is_auction ? Number(base_price) : undefined,
+      fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
+      base_price: is_auction ? Number(base_price) : null,
       auction_end_time: is_auction ? auction_end_time : null,
       ...rest,
     };
