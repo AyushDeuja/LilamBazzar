@@ -112,8 +112,9 @@ export class ProductsService {
   }
 
   // Fetch all products with images
-  async findAll() {
+  async findAll(organization_id: number) {
     return this.prisma.product.findMany({
+      where: { organization_id },
       orderBy: { createdAt: 'desc' },
       include: {
         ProductImage: true,
@@ -131,9 +132,9 @@ export class ProductsService {
   }
 
   // Fetch a single product with images
-  async findOne(id: number) {
+  async findOne(id: number, organization_id: number) {
     const product = await this.prisma.product.findUnique({
-      where: { id },
+      where: { id, organization_id },
       include: {
         ProductImage: true,
         auction: {
@@ -268,6 +269,7 @@ export class ProductsService {
 
   // Delete a product and its images
   async remove(id: number, organization_id: number) {
+    await this.findOne(id, organization_id);
     const product = await this.prisma.product.findUnique({
       where: { id },
       select: { organization_id: true, auction: true },
