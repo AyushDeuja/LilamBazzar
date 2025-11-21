@@ -33,6 +33,30 @@ export class ProductsService {
       ...rest
     } = createProductDto;
 
+    if (is_auction) {
+      if (fixed_price) {
+        throw new BadRequestException(
+          'Fixed price is not allowed for auction products',
+        );
+      }
+      if (base_price == null) {
+        throw new BadRequestException(
+          'Base price is required for auction products',
+        );
+      }
+    } else {
+      if (base_price) {
+        throw new BadRequestException(
+          'Base price is only for auction products',
+        );
+      }
+      if (fixed_price == null) {
+        throw new BadRequestException(
+          'Fixed price is required for normal products',
+        );
+      }
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: organization_id },
     });
@@ -169,6 +193,30 @@ export class ProductsService {
       ...rest
     } = updateProductDto;
 
+    if (is_auction) {
+      if (fixed_price) {
+        throw new BadRequestException(
+          'Fixed price is not allowed for auction products',
+        );
+      }
+      if (base_price == null) {
+        throw new BadRequestException(
+          'Base price is required for auction products',
+        );
+      }
+    } else {
+      if (base_price) {
+        throw new BadRequestException(
+          'Base price is only for auction products',
+        );
+      }
+      if (fixed_price == null) {
+        throw new BadRequestException(
+          'Fixed price is required for normal products',
+        );
+      }
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: organization_id },
     });
@@ -201,6 +249,10 @@ export class ProductsService {
       auction_end_time: is_auction ? auction_end_time : null,
       ...rest,
     };
+
+    if (is_auction && base_price === null) {
+      throw new BadRequestException('Base price is required for auction');
+    }
 
     return this.prisma.$transaction(async (tx) => {
       //updating the main product
