@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -19,7 +20,14 @@ export class BidsService {
     return this.prisma.$transaction(async (tx) => {
       const auction = await tx.auction.findUnique({
         where: { id },
-        include: {
+        select: {
+          id: true,
+          is_active: true,
+          start_time: true,
+          end_time: true,
+          current_price: true,
+          starting_price: true,
+          min_increment: true,
           product: {
             select: {
               product_name: true,
@@ -47,8 +55,48 @@ export class BidsService {
 
       if (presentDate >= auction.end_time)
         throw new BadRequestException(`Auction has ended`);
+
+      const currentHighest = auction.current_price || auction.starting_price;
+      const minNextBid = Number(currentHighest) + Number(auction.min_increment);
+      if (bid_amount < minNextBid) {
+        throw new BadRequestException(`Bid must be at least Rs.${minNextBid}`);
+      }
+
+      if (bidder_id === auction.product.organization_id) {
+        throw new ForbiddenException('You cannot bid on your own product');
+      }
+
+      const bid = await tx.bid.create({
+        data: {
+          bidder_id,
+          auction_id: id,
+          bid_amount,
+        },
+      });
+
+      await tx.auction.update({
+        where: { id },
+        data: { current_price: bid_amount },
+      });
+
+      return {
+        success: true,
+        bid,
+        new_current_price: bid_amount,
+        message: 'Bid placed successfully!',
+      };
     });
   }
 
-  async getBidHistory(id: number, bidder_id: number) {}
+  async getBidHistory(id: number, bidder_id: number) {
+    return this.prisma.bid.findMany({
+      where: { id, bidder_id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        bidder: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+  }
 }
