@@ -106,6 +106,7 @@ model Auction {
   starting_price Decimal  @db.Decimal(10, 2)
   current_price  Decimal? @db.Decimal(10, 2)
   winner_id      Int?
+  min_increment  Decimal  @default(10) @db.Decimal(10, 2)
   is_active      Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

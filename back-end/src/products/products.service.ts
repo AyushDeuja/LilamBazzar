@@ -182,6 +182,7 @@ export class ProductsService {
   async update(id: number, updateProductDto: UpdateProductDto) {
     const {
       product_img = [],
+      min_increment,
       category_id,
       is_auction = false,
       fixed_price,
@@ -278,6 +279,7 @@ export class ProductsService {
             end_time: auction_end_time,
             starting_price: Number(base_price),
             current_price: Number(base_price),
+            min_increment: min_increment ? Number(min_increment) : 10,
           },
         });
       }

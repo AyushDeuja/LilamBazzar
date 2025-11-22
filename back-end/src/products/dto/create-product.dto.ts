@@ -73,4 +73,10 @@ export class CreateProductDto {
   @Type(() => Date)
   @IsAfterStartTime()
   auction_end_time?: Date;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(1, { message: 'Minimum increment must be at least 1' })
+  @Type(() => Number)
+  min_increment?: number = 10;
 }
