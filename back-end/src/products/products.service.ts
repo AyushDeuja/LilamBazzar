@@ -24,6 +24,7 @@ export class ProductsService {
       is_auction = false,
       fixed_price,
       base_price,
+      auction_start_time,
       auction_end_time,
       description,
       product_name,
@@ -78,6 +79,7 @@ export class ProductsService {
       is_auction,
       fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
       base_price: is_auction ? Number(base_price) : null,
+      auction_start_time: is_auction ? auction_start_time : null,
       auction_end_time: is_auction ? auction_end_time : null,
       ...rest,
     };
@@ -91,7 +93,7 @@ export class ProductsService {
         await tx.auction.create({
           data: {
             product_id: product.id,
-            start_time: new Date(),
+            start_time: auction_start_time,
             end_time: auction_end_time,
             starting_price: Number(base_price),
             current_price: Number(base_price),
@@ -184,6 +186,7 @@ export class ProductsService {
       is_auction = false,
       fixed_price,
       base_price,
+      auction_start_time,
       auction_end_time,
       description,
       product_name,
@@ -246,6 +249,7 @@ export class ProductsService {
       is_auction,
       fixed_price: is_auction ? null : fixed_price ? Number(fixed_price) : null,
       base_price: is_auction ? Number(base_price) : null,
+      auction_start_time: is_auction ? auction_start_time : null,
       auction_end_time: is_auction ? auction_end_time : null,
       ...rest,
     };
@@ -270,7 +274,7 @@ export class ProductsService {
         await tx.auction.create({
           data: {
             product_id: id,
-            start_time: new Date(),
+            start_time: auction_start_time,
             end_time: auction_end_time,
             starting_price: Number(base_price),
             current_price: Number(base_price),
