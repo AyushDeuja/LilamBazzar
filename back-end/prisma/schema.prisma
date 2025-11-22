@@ -77,10 +77,11 @@ model Product {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  fixed_price      Decimal?  @db.Decimal(10, 2) // null = auction only
-  base_price       Decimal?  @db.Decimal(10, 2) // starting bid price, only if auction
-  is_auction       Boolean   @default(false)
-  auction_end_time DateTime?
+  fixed_price        Decimal?  @db.Decimal(10, 2) // null = auction only
+  base_price         Decimal?  @db.Decimal(10, 2) // starting bid price, only if auction
+  is_auction         Boolean   @default(false)
+  auction_start_time DateTime?
+  auction_end_time   DateTime?
 
   category Category @relation(fields: [category_id], references: [id])
   user     User     @relation(fields: [organization_id], references: [id])

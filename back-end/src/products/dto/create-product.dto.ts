@@ -12,6 +12,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { IsAfterStartTime } from 'src/validators/is-after-start-time.validatior';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -59,8 +60,17 @@ export class CreateProductDto {
   base_price?: number;
 
   @ValidateIf((o) => o.is_auction)
+  @IsNotEmpty({
+    message: 'auction_start_time is required for auction products',
+  })
+  @IsDate()
+  @Type(() => Date)
+  auction_start_time?: Date;
+
+  @ValidateIf((o) => o.is_auction)
   @IsNotEmpty({ message: 'auction_end_time is required for auction products' })
   @IsDate()
   @Type(() => Date)
+  @IsAfterStartTime()
   auction_end_time?: Date;
 }
