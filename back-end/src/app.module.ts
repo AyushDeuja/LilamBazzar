@@ -8,6 +8,7 @@ import { ProductsModule } from './products/products.module';
 import { SalesModule } from './sales/sales.module';
 import { AuthModule } from './auth/auth.module';
 import { BidsModule } from './bids/bids.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BidsModule } from './bids/bids.module';
     SalesModule,
     AuthModule,
     BidsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

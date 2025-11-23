@@ -172,8 +172,9 @@ model Order {
   user_id        Int
   bid_id         Int?
   total_amount   Decimal   @db.Decimal(12, 2)
+  payment_method String? // khalti, esewa
   payment_status String    @default("pending") // pending, paid, failed
-  payment_method String? // khalti, esewa, cod
+  order_status   String    @default("pending") // pending, confirmed, shipped, delivered, cancelled
   transaction_id String?
   is_delivered   Boolean   @default(false)
   delivered_at   DateTime?
