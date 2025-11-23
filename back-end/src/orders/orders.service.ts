@@ -4,23 +4,27 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
-  create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto) {
     return 'This action adds a new order';
   }
 
-  findAll() {
+  async findAll(user_id: number) {
     return `This action returns all orders`;
   }
 
-  findOne(id: number) {
+  async findOne(id: number, user_id: number) {
     return `This action returns a #${id} order`;
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
+  async getMySales(vendor_id: number) {
+    return `This action returns sales for vendor #${vendor_id}`;
+  }
+
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
     return `This action updates a #${id} order`;
   }
 
-  remove(id: number) {
+  async remove(id: number, user_id: number) {
     return `This action removes a #${id} order`;
   }
 }
