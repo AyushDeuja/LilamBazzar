@@ -88,13 +88,25 @@ export class BidsService {
     });
   }
 
-  async getBidHistory(id: number, bidder_id: number) {
+  async getAuctionBidHistory(id: number) {
     return this.prisma.bid.findMany({
-      where: { id, bidder_id },
+      where: { auction_id: id },
+      orderBy: { createdAt: 'desc' },
+      include: { bidder: { select: { name: true } } },
+    });
+  }
+
+  async getMyBids(bidder_id: number) {
+    return this.prisma.bid.findMany({
+      where: { bidder_id },
       orderBy: { createdAt: 'desc' },
       include: {
-        bidder: {
-          select: { id: true, name: true },
+        auction: {
+          include: {
+            product: {
+              select: { product_name: true, ProductImage: { take: 1 } },
+            },
+          },
         },
       },
     });

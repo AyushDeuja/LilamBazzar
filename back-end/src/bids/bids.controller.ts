@@ -17,8 +17,13 @@ export class BidsController {
     return this.bidsService.placeBid(+id, createBidDto);
   }
 
-  @Get('auction/:id/history')
-  async getBidHistory(@Param('id') id: string, @Req() req: Payload) {
-    return this.bidsService.getBidHistory(+id, req.payload.id);
+  @Get('auction/:auctionId/history')
+  async getAuctionBidHistory(@Param('auctionId') auctionId: string) {
+    return this.bidsService.getAuctionBidHistory(+auctionId);
+  }
+
+  @Get('my-bids')
+  async getMyBids(@Req() req: Payload) {
+    return this.bidsService.getMyBids(req.payload.id);
   }
 }

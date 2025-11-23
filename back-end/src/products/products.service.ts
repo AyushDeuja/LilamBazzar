@@ -143,10 +143,11 @@ export class ProductsService {
       include: {
         ProductImage: true,
         auction: {
-          select: {
-            current_price: true,
-            end_time: true,
-            is_active: true,
+          include: {
+            bids: {
+              orderBy: { bid_amount: 'desc' },
+              take: 5, // Get the 5 highest bids
+            },
           },
         },
         category: { select: { category_name: true } },
@@ -165,7 +166,7 @@ export class ProductsService {
           include: {
             bids: {
               orderBy: { bid_amount: 'desc' },
-              take: 10,
+              take: 5, // Get the 5 highest bids
             },
           },
         },
