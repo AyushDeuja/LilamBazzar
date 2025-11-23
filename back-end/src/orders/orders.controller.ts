@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -23,11 +24,13 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto);
   }
 
-  @Get()
-  findAll(@Req() req: Payload) {
-    return this.ordersService.findAll(req.payload.id);
+  //customers order only
+  @Get('my-orders')
+  getMyOrders(@Req() req: Payload) {
+    return this.ordersService.getMyOrders(req.payload.id);
   }
 
+  //SINGLE ORDER (Only owner can view)
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: Payload) {
     return this.ordersService.findOne(+id, req.payload.id);
@@ -39,18 +42,22 @@ export class OrdersController {
     return this.ordersService.getMySales(req.payload.id);
   }
 
-  @Patch(':id')
-  update(
+  // ADMIN ONLY: Update order status (shipped, delivered, etc.)
+  @Patch(':id/status')
+  async updateStatus(
     @Param('id') id: string,
-    @Body() updateOrderDto: UpdateOrderDto,
+    @Body('order_status') order_status: string,
     @Req() req: Payload,
   ) {
-    updateOrderDto.user_id = req.payload.id;
-    return this.ordersService.update(+id, updateOrderDto);
+    if (req.payload.user_role !== 'admin') {
+      throw new ForbiddenException('Only admin can update order status');
+    }
+    return this.ordersService.updateStatus(+id, status);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: Payload) {
-    return this.ordersService.remove(+id, req.payload.id);
+  // CANCEL ORDER (Only if not shipped)
+  @Patch(':id/cancel')
+  async cancelOrder(@Param('id') id: string, @Req() req: Payload) {
+    return this.ordersService.cancelOrder(+id, req.payload.id);
   }
 }
