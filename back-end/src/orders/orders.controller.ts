@@ -20,8 +20,7 @@ export class OrdersController {
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto, @Req() req: Payload) {
-    createOrderDto.user_id = req.payload.id;
-    return this.ordersService.create(createOrderDto);
+    return this.ordersService.create(createOrderDto, req.payload.id);
   }
 
   //customers order only

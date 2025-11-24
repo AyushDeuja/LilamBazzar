@@ -7,7 +7,9 @@ import { PrismaClient } from '@prisma/client';
 export class OrdersService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto, user_id: number) {
+    const { bid_id, payment_method } = createOrderDto;
+
     return 'This action adds a new order';
   }
 
