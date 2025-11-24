@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -116,15 +117,58 @@ export class OrdersService {
   }
 
   async getMyOrders(user_id: number) {
-    return `This action returns all orders`;
+    return this.prisma.order.findMany({
+      where: { id: user_id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        OrderHasItem: {
+          include: {
+            product: { include: { ProductImage: { take: 1 } } },
+          },
+        },
+        bid: true,
+      },
+    });
   }
 
   async findOne(id: number, user_id: number) {
-    return `This action returns a #${id} order`;
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        OrderHasItem: { include: { product: true } },
+        user: true,
+        bid: true,
+      },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.user_id !== user_id)
+      throw new ForbiddenException('Access denied');
+
+    return order;
   }
 
   async getMySales(vendor_id: number) {
-    return `This action returns sales for vendor #${vendor_id}`;
+    return this.prisma.orderHasItem.findMany({
+      where: {
+        product: { organization_id: vendor_id },
+        order: { order_status: { not: 'cancelled' } },
+      },
+      include: {
+        order: {
+          include: {
+            user: { select: { name: true, mobile: true } },
+            bid: true,
+          },
+        },
+        product: {
+          include: {
+            ProductImage: { take: 1 },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async updateStatus(id: number, order_status: string) {
