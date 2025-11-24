@@ -172,10 +172,45 @@ export class OrdersService {
   }
 
   async updateStatus(id: number, order_status: string) {
-    return `This action updates a #${id} order`;
+    const validStatuses = [
+      'pending',
+      'confirmed',
+      'shipped',
+      'delivered',
+      'cancelled',
+    ];
+    if (!validStatuses.includes(order_status)) {
+      throw new BadRequestException('Invalid order status');
+    }
+
+    return this.prisma.order.update({
+      where: { id },
+      data: {
+        order_status,
+        ...(order_status === 'delivered' && {
+          is_delivered: true,
+          delivered_at: new Date(),
+        }),
+      },
+    });
   }
 
   async cancelOrder(id: number, user_id: number) {
-    return `This action removes a #${id} order`;
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.user_id !== user_id)
+      throw new ForbiddenException('This is not your order');
+    if (!['pending', 'confirmed'].includes(order.order_status)) {
+      throw new BadRequestException('Cannot cancel order at this stage');
+    }
+    return this.prisma.order.update({
+      where: { id },
+      data: {
+        order_status: 'cancelled',
+        payment_status: order.payment_method ? 'failed' : 'cancelled',
+      },
+    });
   }
 }
