@@ -19,10 +19,6 @@ export class OrderItemDto {
 }
 
 export class CreateOrderDto {
-  // @IsOptional()
-  // @IsNumber()
-  // user_id: number;
-
   @IsOptional()
   @IsNumber()
   bid_id?: number; // if from auction win
@@ -33,6 +29,6 @@ export class CreateOrderDto {
   items: OrderItemDto[];
 
   @IsOptional()
-  @IsEnum(['khalti', 'esewa'])
+  @IsEnum(['khalti', 'esewa', 'cod'])
   payment_method?: string;
 }
