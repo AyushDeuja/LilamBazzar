@@ -16,7 +16,6 @@ export class ProductsService {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
-  // Create a new product with multiple base64 images
   async create(createProductDto: CreateProductDto) {
     const {
       product_img = [],
@@ -135,7 +134,6 @@ export class ProductsService {
     });
   }
 
-  // Fetch all products with images
   async findAll(organization_id: number) {
     return this.prisma.product.findMany({
       where: { organization_id },
@@ -156,7 +154,6 @@ export class ProductsService {
     });
   }
 
-  // Fetch a single product with images
   async findOne(id: number, organization_id: number) {
     const product = await this.prisma.product.findUnique({
       where: { id, organization_id },
@@ -179,7 +176,6 @@ export class ProductsService {
     return product;
   }
 
-  // Update a product and its images
   async update(id: number, updateProductDto: UpdateProductDto) {
     const {
       product_img = [],
@@ -194,7 +190,6 @@ export class ProductsService {
       product_name,
       stock,
       organization_id,
-      // organization_id = vendorId,
       ...rest
     } = updateProductDto;
 
@@ -261,7 +256,6 @@ export class ProductsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      //updating the main product
       await tx.product.update({
         where: { id },
         data: productData,
@@ -320,7 +314,6 @@ export class ProductsService {
     });
   }
 
-  // Delete a product and its images
   async remove(id: number, organization_id: number) {
     await this.findOne(id, organization_id);
     const product = await this.prisma.product.findUnique({
@@ -336,12 +329,10 @@ export class ProductsService {
       // delete product image first
       await tx.productImage.deleteMany({ where: { product_id: id } });
 
-      // delete the auction if exists
       if (product.auction) {
         await tx.auction.delete({ where: { id: product.auction.id } });
       }
 
-      // delete the product
       return tx.product.delete({
         where: { id },
         include: {
