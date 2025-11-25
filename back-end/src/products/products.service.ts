@@ -261,26 +261,35 @@ export class ProductsService {
         data: productData,
       });
 
-      if (
-        is_auction &&
-        !product.auction &&
-        base_price != null &&
-        auction_end_time
-      ) {
-        await tx.auction.create({
-          data: {
-            product_id: id,
-            start_time: auction_start_time,
-            end_time: auction_end_time,
-            starting_price: Number(base_price),
-            current_price: Number(base_price),
-            min_increment: min_increment ? Number(min_increment) : 10,
-          },
-        });
+      if (is_auction && base_price != null && auction_end_time) {
+        if (product.auction) {
+          await tx.auction.update({
+            where: { product_id: id },
+            data: {
+              start_time: auction_start_time || undefined,
+              end_time: auction_end_time,
+              starting_price: Number(base_price),
+              current_price: Number(base_price),
+              min_increment: min_increment ? Number(min_increment) : 10,
+            },
+          });
+        } else {
+          // CREATE new auction
+          await tx.auction.create({
+            data: {
+              product_id: id,
+              start_time: auction_start_time || new Date(),
+              end_time: auction_end_time,
+              starting_price: Number(base_price),
+              current_price: Number(base_price),
+              min_increment: min_increment ? Number(min_increment) : 10,
+            },
+          });
+        }
       }
 
+      // Handle images (your existing code)
       if (product_img?.length > 0) {
-        //delete old images
         await tx.productImage.deleteMany({ where: { product_id: id } });
         const uploadedUrls = await Promise.all(
           product_img.map((img: string) =>
@@ -301,10 +310,7 @@ export class ProductsService {
           ProductImage: { orderBy: { id: 'asc' } },
           auction: {
             include: {
-              bids: {
-                orderBy: { bid_amount: 'desc' },
-                take: 5,
-              },
+              bids: { orderBy: { bid_amount: 'desc' }, take: 5 },
             },
           },
           category: { select: { category_name: true } },
