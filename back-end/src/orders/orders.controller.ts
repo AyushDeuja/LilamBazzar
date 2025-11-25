@@ -29,16 +29,16 @@ export class OrdersController {
     return this.ordersService.getMyOrders(req.payload.id);
   }
 
-  //SINGLE ORDER (Only owner can view)
-  @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: Payload) {
-    return this.ordersService.findOne(+id, req.payload.id);
-  }
-
   // Vendor: My Sales
   @Get('my-sales')
   async getMySales(@Req() req: Payload) {
     return this.ordersService.getMySales(req.payload.id);
+  }
+
+  //SINGLE ORDER (Only owner can view)
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req: Payload) {
+    return this.ordersService.findOne(+id, req.payload.id);
   }
 
   // ADMIN ONLY: Update order status (shipped, delivered, etc.)
@@ -51,7 +51,7 @@ export class OrdersController {
     if (req.payload.user_role !== 'admin') {
       throw new ForbiddenException('Only admin can update order status');
     }
-    return this.ordersService.updateStatus(+id, status);
+    return this.ordersService.updateStatus(+id, order_status);
   }
 
   // CANCEL ORDER (Only if not shipped)
