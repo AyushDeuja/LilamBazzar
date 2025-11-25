@@ -9,6 +9,9 @@ import { SalesModule } from './sales/sales.module';
 import { AuthModule } from './auth/auth.module';
 import { BidsModule } from './bids/bids.module';
 import { OrdersModule } from './orders/orders.module';
+import { AuctionWinnerCron } from './cron/auction-winner.cron';
+import { ScheduleModule } from '@nestjs/schedule';
+import { PrismaClient } from '@prisma/client';
 
 @Module({
   imports: [
@@ -20,8 +23,16 @@ import { OrdersModule } from './orders/orders.module';
     AuthModule,
     BidsModule,
     OrdersModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: PrismaClient,
+      useClass: PrismaClient,
+    },
+    AuctionWinnerCron,
+  ],
 })
 export class AppModule {}
