@@ -9,7 +9,6 @@ export class UsersService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(createUserDto: CreateUserDto) {
-    // Check if the user already exists by email or mobile
     const existingUser = await this.prisma.user.findFirst({
       where: {
         OR: [
@@ -33,7 +32,7 @@ export class UsersService {
     }
 
     // Check if the user role is valid
-    const role = createUserDto.user_role ?? 'customer'; // default role
+    const role = createUserDto.user_role ?? 'customer';
 
     if (role === 'vendor') {
       if (!createUserDto.organization_name) {
@@ -61,7 +60,7 @@ export class UsersService {
     if (role !== 'vendor') {
       const { organization_name, pan_no, password, ...userWithoutVendorInfo } =
         createdUser;
-      return userWithoutVendorInfo; // Return user data without vendor info
+      return userWithoutVendorInfo;
     } else {
       const { password, ...userWithoutPassword } = createdUser;
       return userWithoutPassword;
@@ -86,7 +85,7 @@ export class UsersService {
       throw new BadRequestException('User not found');
     }
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword; // Return user data without password
+    return userWithoutPassword;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
