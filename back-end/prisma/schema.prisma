@@ -32,12 +32,10 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  Sale     Sale[]
-  Purchase Purchase[]
-  Product  Product[]
-  Bid      Bid[]
-  Order    Order[]
-  Auction  Auction[]  @relation("AuctionWinner")
+  Product Product[]
+  Bid     Bid[]
+  Order   Order[]
+  Auction Auction[] @relation("AuctionWinner")
 
   @@map("users")
 }
@@ -86,8 +84,6 @@ model Product {
   category Category @relation(fields: [category_id], references: [id])
   user     User     @relation(fields: [organization_id], references: [id])
 
-  sales        Sale[]
-  Purchase     Purchase[]
   OrderHasItem OrderHasItem[]
   ProductImage ProductImage[]
   auction      Auction?       @relation("ProductAuction")
@@ -132,38 +128,6 @@ model Bid {
   orders  Order[]
 
   @@map("bids")
-}
-
-model Sale {
-  id         Int      @id @default(autoincrement())
-  user_id    Int //must be vendor
-  product_id Int
-  quantity   Int
-  commission Decimal  @db.Decimal(10, 2)
-  total      Decimal  @db.Decimal(10, 2)
-  tax        Decimal  @db.Decimal(10, 2)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  user    User    @relation(fields: [user_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
-
-  @@map("sales")
-}
-
-model Purchase {
-  id          Int      @id @default(autoincrement())
-  user_id     Int
-  product_id  Int
-  quantity    Int
-  const_price Decimal  @db.Decimal(10, 2)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user    User    @relation(fields: [user_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
-
-  @@map("purchases")
 }
 
 model Order {
