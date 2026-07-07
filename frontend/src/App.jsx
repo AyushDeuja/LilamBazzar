@@ -53,7 +53,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <footer className="footer">
-        <div className="container">
+        <div className="container ">
           <strong>LilamBazzar</strong> — bid, win &amp; shop. Built with NestJS +
           React.
         </div>
