@@ -38,12 +38,14 @@ export class AuthService {
       throw new NotFoundException('Unable to find user');
     }
 
-    const isPasswordValid = compare(loginDto.password, user.password);
+    const isPasswordValid = await compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid Credentials');
     }
 
-    const token = await this.jwtService.signAsync(user);
+    // never embed the (hashed) password in the token payload
+    const { password, ...payload } = user;
+    const token = await this.jwtService.signAsync(payload);
     return { token };
   }
 

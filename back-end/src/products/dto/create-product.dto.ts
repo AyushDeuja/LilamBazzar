@@ -34,8 +34,10 @@ export class CreateProductDto {
   @Type(() => Number)
   stock: number;
 
-  @IsOptional()
+  // required: Product.category_id is non-nullable in the Prisma schema
+  @IsNotEmpty({ message: 'category_id is required — pick or create a category' })
   @IsNumber()
+  @Type(() => Number)
   category_id: number;
 
   @IsOptional()

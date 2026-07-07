@@ -23,6 +23,15 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto, req.payload.id);
   }
 
+  // ADMIN ONLY: list every order for the management dashboard
+  @Get()
+  findAll(@Req() req: Payload) {
+    if (req.payload.user_role !== 'admin') {
+      throw new ForbiddenException('Only admin can view all orders');
+    }
+    return this.ordersService.findAllAdmin();
+  }
+
   //customers order only
   @Get('my-orders')
   getMyOrders(@Req() req: Payload) {

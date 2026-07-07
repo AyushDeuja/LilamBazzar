@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Payload } from 'src/interfaces/payload';
+import { Public } from 'src/helper/public';
 
 @Controller('products')
 export class ProductsController {
@@ -21,6 +23,28 @@ export class ProductsController {
   create(@Body() createProductDto: CreateProductDto, @Req() req: Payload) {
     createProductDto.organization_id = req.payload.id;
     return this.productsService.create(createProductDto);
+  }
+
+  // Public marketplace catalog — customers browse every vendor's products here
+  @Public()
+  @Get('browse')
+  browse(
+    @Query('category_id') category_id?: string,
+    @Query('is_auction') is_auction?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.productsService.findAllPublic({
+      category_id: category_id ? +category_id : undefined,
+      is_auction:
+        is_auction === 'true' ? true : is_auction === 'false' ? false : undefined,
+      search,
+    });
+  }
+
+  @Public()
+  @Get('browse/:id')
+  browseOne(@Param('id') id: string) {
+    return this.productsService.findOnePublic(+id);
   }
 
   @Get()

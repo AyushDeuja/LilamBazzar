@@ -25,6 +25,8 @@ export class ProductsService {
       base_price,
       auction_start_time,
       auction_end_time,
+      // auction-only field — must not leak into the product create via ...rest
+      min_increment,
       description,
       product_name,
       stock,
@@ -96,6 +98,10 @@ export class ProductsService {
             end_time: auction_end_time,
             starting_price: Number(base_price),
             current_price: Number(base_price),
+            // omit to let the schema default (10) apply
+            ...(min_increment != null && {
+              min_increment: Number(min_increment),
+            }),
           },
         });
       }
@@ -132,6 +138,57 @@ export class ProductsService {
         },
       });
     });
+  }
+
+  async findAllPublic(filters: {
+    category_id?: number;
+    is_auction?: boolean;
+    search?: string;
+  }) {
+    const { category_id, is_auction, search } = filters;
+    return this.prisma.product.findMany({
+      where: {
+        ...(category_id != null && { category_id }),
+        ...(is_auction != null && { is_auction }),
+        ...(search && {
+          product_name: { contains: search, mode: 'insensitive' },
+        }),
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ProductImage: { orderBy: { id: 'asc' } },
+        auction: {
+          include: {
+            bids: { orderBy: { bid_amount: 'desc' }, take: 5 },
+          },
+        },
+        category: { select: { category_name: true } },
+        user: { select: { name: true, organization_name: true } },
+      },
+    });
+  }
+
+  async findOnePublic(id: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        ProductImage: { orderBy: { id: 'asc' } },
+        auction: {
+          include: {
+            bids: {
+              orderBy: { bid_amount: 'desc' },
+              take: 5,
+              include: { bidder: { select: { name: true } } },
+            },
+          },
+        },
+        category: { select: { category_name: true } },
+        user: { select: { name: true, organization_name: true } },
+      },
+    });
+
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 
   async findAll(organization_id: number) {

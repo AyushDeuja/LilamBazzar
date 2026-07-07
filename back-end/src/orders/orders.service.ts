@@ -116,9 +116,24 @@ export class OrdersService {
     });
   }
 
+  async findAllAdmin() {
+    return this.prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { name: true, mobile: true, email: true } },
+        OrderHasItem: {
+          include: {
+            product: { include: { ProductImage: { take: 1 } } },
+          },
+        },
+        bid: true,
+      },
+    });
+  }
+
   async getMyOrders(user_id: number) {
     return this.prisma.order.findMany({
-      where: { id: user_id },
+      where: { user_id },
       orderBy: { createdAt: 'desc' },
       include: {
         OrderHasItem: {
